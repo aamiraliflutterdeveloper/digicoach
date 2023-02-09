@@ -1,8 +1,15 @@
-import 'package:clients_digcoach/screens/day_vew_screeen.dart';
-import 'package:clients_digcoach/screens/heat_map/heat_map_page.dart';
-import 'package:clients_digcoach/screens/weeK_view_screen.dart';
+import 'package:clients_digcoach/core/responsive.dart';
+import 'package:clients_digcoach/providers/club_provider.dart';
+import 'package:clients_digcoach/providers/home_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../core/constants/menus.dart';
+import '../providers/coach_provider.dart';
+import '../providers/court_provider.dart';
+import '../providers/reservation_provider.dart';
+import '../widgets/home/app_bar_widget.dart';
+import '../widgets/home/drawer_widget.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -12,77 +19,55 @@ class HomePage extends ConsumerStatefulWidget {
 }
 
 class _HomePageState extends ConsumerState<HomePage> {
-  int _selectedIndex = 0;
-
-  final List<Map<String, dynamic>> _widgetOptions = [
-    {'title': 'Heat Map', 'widget': const HeatMapPage()},
-    {'title': 'Day View', 'widget': const DayViewScreen()},
-    {'title': 'Week View', 'widget': const WeekViewScreen()},
-    {'title': 'Month View', 'widget': const HeatMapPage()},
-  ];
-
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('DigCoach'),
-      ),
-      body: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: _widgetOptions
-                .map(
-                  (e) => MenuWidget(
-                    title: e['title'],
-                    selectedIndex: _selectedIndex,
-                    index: _widgetOptions.indexOf(e),
-                    onTap: () {
-                      setState(() {
-                        _selectedIndex = _widgetOptions.indexOf(e);
-                      });
-                    },
-                  ),
-                )
-                .toList(),
-          ),
-          Expanded(
-            child: _widgetOptions[_selectedIndex]['widget'],
-          ),
-        ],
-      ),
-    );
+  void initState() {
+    super.initState();
+    _fetchClubs();
+    // clubId();
+    _fetchCourts();
+    // _fetchCourtId();
+    _fetchCoaches();
+    _fetchReservations();
+    // _fetchCoachId();
   }
-}
 
-class MenuWidget extends StatelessWidget {
-  final String title;
-  final VoidCallback onTap;
-  final int selectedIndex;
-  final int index;
+  Future<void> _fetchClubs() async => await ref.read(clubProvider).getClubs();
 
-  const MenuWidget(
-      {super.key,
-      required this.title,
-      required this.onTap,
-      required this.selectedIndex,
-      required this.index});
+  // Future<void> clubId() async => await ref.read(clubProvider).getClubId();
+
+  Future<void> _fetchCourts() async =>
+      await ref.read(courtProvider).getCourts();
+
+  // Future<void> _fetchCourtId() async =>
+  //     await ref.read(courtProvider).getCourtId();
+
+  Future<void> _fetchReservations() async =>
+      await ref.read(reservationProvider).getReservations();
+
+  Future<void> _fetchCoaches() async =>
+      await ref.read(coachProvider).getCoaches();
+
+  // Future<void> _fetchCoachId() async =>
+  //     await ref.read(coachProvider).getCoachId();
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Ink(
-        color: selectedIndex == index ? Colors.grey : Colors.white,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
-          child: Text(title),
-        ),
-      ),
-    );
+    final responsive = Responsive();
+    responsive.init(context);
+    final isDesktop = responsive.isDesktop;
+    return  Scaffold(
+            drawerEnableOpenDragGesture: false,
+            appBar: const AppBarWidget(),
+            drawer: isDesktop ? null : const DrawerWidget(),
+            body: Row(
+              children: [
+                if (isDesktop) const Expanded(child: DrawerWidget()),
+                Expanded(
+                  flex: 5,
+                  child: menus[ref.watch(homeProvider).currentIndex].widget,
+                ),
+              ],
+            ),
+          );
   }
 }

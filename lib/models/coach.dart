@@ -2,14 +2,16 @@
 
 class Coach {
   final String id;
+  final String clubId;
   final String name;
   final String address;
   final String phone;
   final String image;
   final String description;
 
-  Coach({
+  const Coach({
     required this.id,
+    required this.clubId,
     required this.name,
     required this.address,
     required this.phone,
@@ -17,25 +19,23 @@ class Coach {
     required this.description,
   });
 
-  factory Coach.fromJson(Map<String, dynamic> json) {
-    return Coach(
-      id: json['id'],
-      name: json['name'],
-      address: json['address'],
-      phone: json['phone'],
-      image: json['image'],
-      description: json['description'],
-    );
-  }
+  factory Coach.fromJson(Map<String, dynamic> json) => Coach(
+        id: json['id'],
+        clubId: json['clubId'],
+        name: json['name'],
+        address: json['address'],
+        phone: json['phone'],
+        image: json['image'],
+        description: json['description'],
+      );
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'address': address,
-      'phone': phone,
-      'image': image,
-      'description': description,
-    };
-  }
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'clubId': clubId,
+        'name': name,
+        'address': address,
+        'phone': phone,
+        'image': image,
+        'description': description,
+      };
 }

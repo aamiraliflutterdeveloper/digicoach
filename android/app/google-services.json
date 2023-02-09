@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "374714244402",
+    "project_id": "client-digcoach",
+    "storage_bucket": "client-digcoach.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:374714244402:android:c3cf73438893b390ce8b2b",
+        "android_client_info": {
+          "package_name": "com.example.clients_digcoach"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "374714244402-ps6dbslvnevhonv6d3uniermogkfv5rq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDSziRTUSUuZeu2l0DbAOY60RXVJ78OXUU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "374714244402-ps6dbslvnevhonv6d3uniermogkfv5rq.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "374714244402-dg9lhgtm7pbjn99o7vni0ibr0b3jdoiq.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.clientsDigcoach"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
