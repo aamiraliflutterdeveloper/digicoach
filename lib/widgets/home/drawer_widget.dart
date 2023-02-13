@@ -1,46 +1,71 @@
-import 'package:clients_digcoach/core/constants/functions.dart';
 import 'package:clients_digcoach/providers/club_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/colors.dart';
 import '../../core/constants/menus.dart';
-import '../../core/responsive.dart';
+import '../../models/menu.dart';
+import '../../providers/coach_provider.dart';
+import '../../providers/court_provider.dart';
 import '../../providers/home_provider.dart';
+import '../../providers/reservation_provider.dart';
 import 'home_menu_item_widget.dart';
 
-class DrawerWidget extends ConsumerWidget {
+class DrawerWidget extends ConsumerStatefulWidget {
   const DrawerWidget({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) => Drawer(
+  ConsumerState<ConsumerStatefulWidget> createState() => _DrawerWidgetState();
+}
+
+class _DrawerWidgetState extends ConsumerState<DrawerWidget> {
+  @override
+  Widget build(BuildContext context) => Drawer(
         elevation: 0,
-        child: Column(
+        child: ReorderableListView(
+          onReorder: _onReorder,
           children: List.generate(
             menus.length,
             (index) {
               final menu = menus[index];
-              return Expanded(
-                child: HomeMenuItemWidget(
-                  title: menu.title,
-                  icon: menu.icon,
-                  onTap: () {
-                    if (ref.watch(clubProvider).selectedClubId == null &&
-                        index == 5) {
-                      buildDialog(context,
-                          child: const Text('Select Club First'));
-                    } else {
-                      ref.read(homeProvider).currentIndex = index;
-                    }
-                    Scaffold.of(context).closeDrawer();
-                  },
-                  itemColor: ref.watch(homeProvider).currentIndex == index
-                      ? kSecondaryColor
-                      : kPrimaryColor,
-                ),
+              return HomeMenuItemWidget(
+                key: ValueKey(menu),
+                title: menu.title,
+                icon: menu.icon,
+                onTap: () => _onTap(index),
+                itemColor: ref.watch(homeProvider).currentIndex == index
+                    ? kSecondaryColor
+                    : kPrimaryColor,
               );
             },
           ),
         ),
       );
+
+  void _onTap(int index) {
+    ref.read(homeProvider).currentIndex = index;
+    if (index == 5) {
+      final clubId = ref.watch(clubProvider).selectedClubId;
+      final courtNumber = ref.watch(courtProvider).selectedCourtNumber;
+      final coachId = ref.watch(coachProvider).selectedCoachId;
+      ref.read(reservationProvider).getReservationsByClubId(clubId!);
+      ref.read(courtProvider).getCourtsByClubId(clubId, ref);
+      ref.read(courtProvider).getCourtNumber(clubId);
+      ref
+          .read(reservationProvider)
+          .getReservationsByCourtNumber(courtNumber ?? 1);
+      ref.read(coachProvider).getCoachId(clubId);
+      ref.read(coachProvider).getCoachesByClubId(clubId);
+      ref.read(reservationProvider).getReservationsByCoachId(coachId: coachId! );
+    }
+    // if (!mounted) return;
+    Scaffold.of(context).closeDrawer();
+  }
+
+  void _onReorder(int oldIndex, int newIndex) => setState(() {
+        final index = newIndex > oldIndex ? newIndex - 1 : newIndex;
+        ref.watch(homeProvider).currentIndex = index;
+        Menu menu = menus.removeAt(oldIndex);
+        menus.insert(index, menu);
+      });
 }

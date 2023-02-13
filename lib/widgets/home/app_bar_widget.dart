@@ -18,11 +18,19 @@ class AppBarWidget extends ConsumerStatefulWidget
   ConsumerState<ConsumerStatefulWidget> createState() => _AppBarWidgetState();
 
   @override
-  Size get preferredSize => const Size.fromHeight(75);
+  Size get preferredSize => const Size.fromHeight(100);
 }
 
 class _AppBarWidgetState extends ConsumerState<AppBarWidget> {
   String currentLanguageValue = '0';
+
+  Future<void> clubId() async => await ref.read(clubProvider).getClubId();
+
+  @override
+  void initState() {
+    clubId();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +43,7 @@ class _AppBarWidgetState extends ConsumerState<AppBarWidget> {
       backgroundColor: Colors.transparent,
       automaticallyImplyLeading: false,
       centerTitle: false,
-      toolbarHeight: 75,
+      toolbarHeight: 100,
       leading: isDesktop
           ? null
           : IconButton(
@@ -44,30 +52,38 @@ class _AppBarWidgetState extends ConsumerState<AppBarWidget> {
             ),
       title: Row(
         children: [
-          const Expanded(
-              child:
-                  Icon(Icons.sports_baseball, color: kPrimaryColor, size: 70)),
+          Expanded(
+            child: Image.asset(
+              'assets/images/Logo.png',
+              height: 100,
+              width: 100,
+            ),
+          ),
           const SizedBox(width: 16),
           if (isDesktop) ...[
             Expanded(
               flex: 2,
               child: DropDownWidget(
-                hint: 'Select Club',
+                hintText: 'Select Club',
                 currentValue: ref.watch(clubProvider).selectedClubId,
                 onChanged: _onClubChanged,
-                id: ref.read(clubProvider).clubs.map((e) => e.id).toList(),
-                items: ref.read(clubProvider).clubs.map((e) => e.generalInfo.name).toList(),
+                values: ref.read(clubProvider).clubs.map((e) => e.id).toList(),
+                items: ref
+                    .read(clubProvider)
+                    .clubs
+                    .map((e) => e.generalInfo.name)
+                    .toList(),
               ),
             ),
             const SizedBox(width: 16),
             Expanded(
               child: DropDownWidget(
-                hint: 'Select Language',
+                hintText: 'Select Language',
                 currentValue: currentLanguageValue,
                 onChanged: (value) =>
                     setState(() => currentLanguageValue = value!),
                 items: const ['English', 'Spanish', 'Italian'],
-                id: const ['0', '1', '2'],
+                values: const ['0', '1', '2'],
               ),
             ),
             const SizedBox(width: 16),
@@ -104,6 +120,11 @@ class _AppBarWidgetState extends ConsumerState<AppBarWidget> {
     ref.read(clubProvider).selectedClubId = value!;
     ref.read(reservationProvider).getReservationsByClubId(value);
     ref.read(courtProvider).getCourtsByClubId(value, ref);
+    ref.read(courtProvider).getCourtNumber(value);
     ref.read(coachProvider).getCoachesByClubId(value);
+    ref.read(coachProvider).getCoachId(value);
+    ref.read(reservationProvider).getReservationsByCoachId(
+        coachId: ref.watch(coachProvider).selectedCoachId!);
+
   }
 }

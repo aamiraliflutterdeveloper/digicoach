@@ -29,11 +29,10 @@ class _WeekViewScreenState extends ConsumerState<WeekViewScreen> {
                 SizedBox(
                   width: 200,
                   child: DropDownWidget(
-                    hint: 'Select Court',
-                    // currentValue: ref.watch(courtProvider).selectedCourtId,
+                    hintText: 'Select Court',
                     currentValue: ref.watch(courtProvider).selectedCourtNumber,
-                    onChanged: _onChangedCourt,
-                    id: courts.map((e) => e.courtNumber.toString()).toList(),
+                    onChanged:(value)=> _onChangedCourt(value as int?),
+                    values: courts.map((e) => e.courtNumber).toList(),
                     items: courts.map((e) => e.name).toList(),
                   ),
                 ),
@@ -44,10 +43,8 @@ class _WeekViewScreenState extends ConsumerState<WeekViewScreen> {
           );
   }
 
-  void _onChangedCourt(String? value) {
-    // ref.read(courtProvider).selectedCourtId = value!;
+  void _onChangedCourt(int? value) {
     ref.read(courtProvider).selectedCourtNumber = value!;
-    // ref.read(reservationProvider).getReservationsByCourtId(value);
-    ref.read(reservationProvider).getReservationsByCourtNumber(int.parse(value));
+    ref.read(reservationProvider).getReservationsByCourtNumber(value);
   }
 }

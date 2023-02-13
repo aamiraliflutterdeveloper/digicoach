@@ -52,4 +52,18 @@ List<Day> days = [
     openingHours: openingHours,
     clubId: '1',
   ),
+ Day(
+    id: '8',
+    daysWeek: DaysWeek.saturday,
+    checked: false,
+    openingHours: openingHours,
+    clubId: '1',
+  ),
+ Day(
+    id: '9',
+    daysWeek: DaysWeek.saturday,
+    checked: true,
+    openingHours: openingHours,
+    clubId: '1',
+  ),
 ];

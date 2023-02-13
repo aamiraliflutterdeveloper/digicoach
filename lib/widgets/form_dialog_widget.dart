@@ -2,6 +2,7 @@ import 'package:clients_digcoach/core/utils.dart';
 import 'package:clients_digcoach/models/reservation.dart';
 import 'package:clients_digcoach/providers/club_provider.dart';
 import 'package:clients_digcoach/providers/reservation_provider.dart';
+import 'package:clients_digcoach/widgets/button_widget.dart';
 import 'package:clients_digcoach/widgets/drop_down_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,8 +20,8 @@ class FormDialogWidget extends ConsumerStatefulWidget {
   });
 
   final DateTime? dateTime;
-  final Object? coachId;
-  final String? courtNumber;
+  final String? coachId;
+  final int? courtNumber;
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
@@ -31,8 +32,8 @@ class _FormDialogWidgetState extends ConsumerState<FormDialogWidget> {
   late DateTime startDateTime;
   late DateTime endDateTime;
   final formKey = GlobalKey<FormState>();
-  late Object? coachId;
-  late String? courtNumber;
+  late String? coachId;
+  late int? courtNumber;
 
   final descriptionController = TextEditingController();
   final titleController = TextEditingController();
@@ -67,27 +68,19 @@ class _FormDialogWidgetState extends ConsumerState<FormDialogWidget> {
           const SizedBox(height: 24),
           const Text('Select Coach'),
           DropDownWidget(
-            hint: 'Select Coach',
-            currentValue: (coachId as String?),
+            hintText: 'Select Coach',
+            currentValue: coachId,
             onChanged: (value) => setState(() => coachId = value),
             items: coach.coachesByClubId.map((e) => e.name).toList(),
-            id: coach.coachesByClubId.map((e) => e.id).toList(),
+            values: coach.coachesByClubId.map((e) => e.id).toList(),
           ),
           const SizedBox(height: 24),
           const Text('Select Court'),
           DropDownWidget(
-            hint: 'Select Court',
-            currentValue:courtNumber?? ref.watch(courtProvider).selectedCourtNumber ,
-            // currentValue: ref.watch(courtProvider).selectedCourtNumber,
-            // onChanged: (value) => setState(() => courtNumber = value),
-            onChanged: ref.read(courtProvider).selectedCourtNumber == null
-                ? (value) => setState(() => courtNumber = value)
-                : (value) => setState(
-                    () => ref.read(courtProvider).selectedCourtNumber = value),
-
-            // currentValue: ref.watch(courtProvider).selectedCourtId,
-            // onChanged: (value) => court.selectedCourtId = value!,
-            id: court.courtsByClubId.map((e) => '${e.courtNumber}').toList(),
+            hintText: 'Select Court',
+            currentValue: courtNumber,
+            onChanged: (value) => setState(() => courtNumber = value as int?),
+            values: court.courtsByClubId.map((e) => e.courtNumber).toList(),
             items: court.courtsByClubId.map((e) => e.name).toList(),
             validator: (title) => title == null ? 'field required' : null,
           ),
@@ -113,7 +106,7 @@ class _FormDialogWidgetState extends ConsumerState<FormDialogWidget> {
                 const Text('start'),
                 TextFormFieldWidget(
                   hintText:
-                      '${Utils.toDate(startDateTime)} - ${Utils.toTime(startDateTime)}',
+                      Utils.toDateTime(startDateTime),
                   isSuffix: true,
                   dateOnPressed: () => pickStartDateTime(true),
                   timeOnPressed: () => pickStartDateTime(false),
@@ -129,7 +122,7 @@ class _FormDialogWidgetState extends ConsumerState<FormDialogWidget> {
                 const Text('end'),
                 TextFormFieldWidget(
                   hintText:
-                      '${Utils.toDate(endDateTime)} - ${Utils.toTime(endDateTime)}',
+                      Utils.toDateTime(endDateTime),
                   isSuffix: true,
                   dateOnPressed: () => pickEndDateTime(true),
                   timeOnPressed: () => pickEndDateTime(false),
@@ -149,44 +142,31 @@ class _FormDialogWidgetState extends ConsumerState<FormDialogWidget> {
             child: const Text('Cancel'),
           ),
           const SizedBox(width: 16),
-          ElevatedButton(
-            onPressed: () {
-              final isValid = formKey.currentState!.validate();
-              if (isValid) {
-                final reservation = Reservation(
-                  id: '${ref.watch(reservationProvider).reservations.length + 1}',
-                  // courtId: ref.watch(courtProvider).selectedCourtId!,
-                  // courtId: courtNumber.toString(),
-                  // courtId:  ,
-                  clubId: ref.watch(clubProvider).selectedClubId!,
-                  startTime: startDateTime,
-                  endTime: endDateTime,
-                  status: ReservationStatus.pending,
-                  title: titleController.text,
-                  coachId: coachId as String? ?? '',
-                  courtNumber: int.parse(
-                      ref.watch(courtProvider).selectedCourtNumber ??courtNumber.toString() ),
-                  // int.parse(courtNumber.toString()),
-                );
-                ref.read(reservationProvider).addReservation(
-                      reservation,
-                      reservation.clubId,
-                      // int.parse(courtNumber.toString()),
-                  int.parse(
-                      ref.watch(courtProvider).selectedCourtNumber ??courtNumber.toString() ),
-                      // reservation.courtId,
-                    );
-                Navigator.of(context).pop();
-              }
-            },
-            style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.white,
-                backgroundColor: Colors.blue,
-                fixedSize: Size(width / 12, 30)),
-            child: const Text('Save'),
+          ButtonWidget(
+            title: 'Save',
+            fixedSize: Size(width / 12, 30),
+            onPressed: _addReservation,
           ),
         ],
       );
+
+  void _addReservation() {
+    final isValid = formKey.currentState!.validate();
+    if (isValid) {
+      final reservation = Reservation(
+        id: '${ref.watch(reservationProvider).reservations.length + 1}',
+        clubId: ref.watch(clubProvider).selectedClubId!,
+        startTime: startDateTime,
+        endTime: endDateTime,
+        status: ReservationStatus.pending,
+        title: titleController.text,
+        coachId: coachId ?? '',
+        courtNumber: courtNumber!,
+      );
+      ref.read(reservationProvider).addReservation(reservation);
+      Navigator.of(context).pop();
+    }
+  }
 
   Future<void> pickStartDateTime(bool isDate) async {
     final date = await pickDateTime(initialDate: startDateTime, isDate: isDate);

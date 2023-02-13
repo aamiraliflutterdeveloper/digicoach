@@ -1,4 +1,3 @@
-import 'package:clients_digcoach/providers/club_provider.dart';
 import 'package:clients_digcoach/providers/court_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,21 +21,31 @@ class CoachesViewWidget extends ConsumerStatefulWidget {
 class _CoachesViewWidgetState extends ConsumerState<CoachesViewWidget> {
   final calendarController = CalendarController();
 
-
   @override
-  Widget build(BuildContext context) => MouseRegionWidget(
-        controller: calendarController,
-        child: SfCalendar(
-          showDatePickerButton: true,
-          controller: calendarController,
-          view: CalendarView.timelineWeek,
-          dataSource: _addResources(),
-          onTap: _onCoachesViewTap,
-        ),
-      );
+  Widget build(BuildContext context) => ref.watch(coachProvider).isLoading &&
+          ref.watch(reservationProvider).isLoading
+      ? const Expanded(
+          child: Center(
+            child: CircularProgressIndicator.adaptive(),
+          ),
+        )
+      : Expanded(
+          child: MouseRegionWidget(
+            controller: calendarController,
+            child: SfCalendar(
+              showDatePickerButton: true,
+              controller: calendarController,
+              view: CalendarView.timelineWeek,
+              timeSlotViewSettings: const TimeSlotViewSettings(
+                  timeInterval: Duration(minutes: 30), timeFormat: 'h:mm'),
+              dataSource: _addResources(),
+              onTap: _onCoachesViewTap,
+            ),
+          ),
+        );
 
   void _onCoachesViewTap(CalendarTapDetails details) {
-        if (details.targetElement == CalendarElement.calendarCell) {
+    if (details.targetElement == CalendarElement.calendarCell) {
       final dateTime = details.date;
       final coachId = details.resource?.id;
       print('coach view coachId---> $coachId');
@@ -44,12 +53,10 @@ class _CoachesViewWidgetState extends ConsumerState<CoachesViewWidget> {
         context,
         child: FormDialogWidget(
           dateTime: dateTime,
-          coachId: coachId,
+          coachId: '$coachId',
 
-          // courtNumber: ref.watch(courtProvider).selectedCourtId,
           courtNumber: ref.watch(courtProvider).selectedCourtNumber,
         ),
-
       );
     }
   }
@@ -66,7 +73,7 @@ class _CoachesViewWidgetState extends ConsumerState<CoachesViewWidget> {
               startTimeZone: '',
               endTimeZone: '',
               subject: reservation.title,
-              resourceIds: [reservation.coachId!]),
+              resourceIds: [reservation.coachId]),
         )
         .toList();
 
@@ -78,7 +85,7 @@ class _CoachesViewWidgetState extends ConsumerState<CoachesViewWidget> {
             color: kPrimaryColor,
             displayName: coach.name,
             id: coach.id,
-            image: NetworkImage(coach.image),
+            image: NetworkImage(coach.image ?? ''),
           ),
         )
         .toList();

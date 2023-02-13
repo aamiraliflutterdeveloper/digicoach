@@ -23,23 +23,19 @@ class _HomePageState extends ConsumerState<HomePage> {
   void initState() {
     super.initState();
     _fetchClubs();
-    // clubId();
+    clubId();
     _fetchCourts();
-    // _fetchCourtId();
     _fetchCoaches();
     _fetchReservations();
-    // _fetchCoachId();
   }
 
   Future<void> _fetchClubs() async => await ref.read(clubProvider).getClubs();
 
-  // Future<void> clubId() async => await ref.read(clubProvider).getClubId();
+  Future<void> clubId() async => await ref.read(clubProvider).getClubId();
 
   Future<void> _fetchCourts() async =>
       await ref.read(courtProvider).getCourts();
 
-  // Future<void> _fetchCourtId() async =>
-  //     await ref.read(courtProvider).getCourtId();
 
   Future<void> _fetchReservations() async =>
       await ref.read(reservationProvider).getReservations();
@@ -47,8 +43,7 @@ class _HomePageState extends ConsumerState<HomePage> {
   Future<void> _fetchCoaches() async =>
       await ref.read(coachProvider).getCoaches();
 
-  // Future<void> _fetchCoachId() async =>
-  //     await ref.read(coachProvider).getCoachId();
+
 
   @override
   Widget build(BuildContext context) {

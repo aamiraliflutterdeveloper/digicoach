@@ -1,3 +1,4 @@
+import 'package:clients_digcoach/models/reservation.dart';
 import 'package:clients_digcoach/providers/court_provider.dart';
 import 'package:clients_digcoach/widgets/schedule/mouse_region_widget.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import 'package:syncfusion_flutter_calendar/calendar.dart';
 import '../../core/constants/colors.dart';
 import '../../core/constants/functions.dart';
 import '../../providers/reservation_provider.dart';
+import '../drop_down_widget.dart';
 import '../form_dialog_widget.dart';
 
 class WeekViewWidget extends ConsumerStatefulWidget {
@@ -20,45 +22,90 @@ class _WeekViewWidgetState extends ConsumerState<WeekViewWidget> {
   final calendarController = CalendarController();
 
   @override
-  Widget build(BuildContext context) => MouseRegionWidget(
-        controller: calendarController,
-        child: SfCalendar(
-          view: CalendarView.week,
-          dataSource: _getCalendarDataSource(),
-          controller: calendarController,
-          showDatePickerButton: true,
-          showNavigationArrow: true,
-          allowAppointmentResize: true,
-          allowViewNavigation: true,
-          onTap: (details) {
-            if (details.targetElement == CalendarElement.calendarCell) {
-              final dateTime = details.date;
-              final coachId = details.resource?.id;
-              print('week coachId---> $coachId');
-
-              // if (ref.watch(courtProvider).selectedCourtId != null) {
-              if (ref.watch(courtProvider).selectedCourtNumber != null) {
-                buildDialog(
-                  context,
-                  child: FormDialogWidget(
-                    dateTime: dateTime,
-                    coachId: coachId,
-                    // courtNumber: ref.watch(courtProvider).selectedCourtId,
-                    courtNumber: ref.watch(courtProvider).selectedCourtNumber,
+  Widget build(BuildContext context) {
+    final courts = ref.read(courtProvider).courtsByClubId;
+    return ref.watch(reservationProvider).isLoading
+        ? const Expanded(
+            child: Center(
+              child: CircularProgressIndicator.adaptive(),
+            ),
+          )
+        : Expanded(
+            child: Column(
+              children: [
+                SizedBox(
+                  width: 200,
+                  child: DropDownWidget(
+                    hintText: 'Select Court',
+                    currentValue: ref.watch(courtProvider).selectedCourtNumber,
+                    onChanged:(value)=> _onChangedCourt(value as int?),
+                    values: courts.map((e) => e.courtNumber).toList(),
+                    items: courts.map((e) => e.name).toList(),
                   ),
-                );
-              } else {
-                buildDialog(context, child: Text('Select Court First'));
-              }
-            }
-          },
-        ),
-      );
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: MouseRegionWidget(
+                    controller: calendarController,
+                    child: SfCalendar(
+                      view: CalendarView.week,
+                      firstDayOfWeek: 1,
+                      allowedViews: const[
+                        CalendarView.day,
+                        CalendarView.week,
+                        CalendarView.month,
+                      ],
+                      dataSource: _getCalendarDataSource(),
+                      specialRegions: _getTimeRegions(),
+                      controller: calendarController,
+                      showDatePickerButton: true,
+                      showNavigationArrow: true,
+                      allowViewNavigation: true,
+                      allowDragAndDrop: true,
+                      timeSlotViewSettings: const TimeSlotViewSettings(
+                        timeInterval: Duration(minutes: 30),
+                        timeFormat: 'h:mm',
+                      ),
+                      onTap: _onTap,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+  }
+
+  void _onChangedCourt(int? value) {
+    ref.read(courtProvider).selectedCourtNumber = value!;
+    ref
+        .read(reservationProvider)
+        .getReservationsByCourtNumber(value);
+  }
+
+  void _onTap(CalendarTapDetails details) {
+    if (details.targetElement == CalendarElement.calendarCell) {
+      final dateTime = details.date;
+      final coachId = details.resource?.id;
+      print('week coachId---> $coachId');
+
+      if (ref.watch(courtProvider).selectedCourtNumber != null) {
+        buildDialog(
+          context,
+          child: FormDialogWidget(
+            dateTime: dateTime,
+            coachId: '$coachId',
+            courtNumber: ref.watch(courtProvider).selectedCourtNumber,
+          ),
+        );
+      } else {
+        buildDialog(context, child: Text('Select Court First'));
+      }
+    }
+  }
 
   List<Appointment> appointments = [];
 
   CustomDataSource _getCalendarDataSource() {
-    // if (ref.watch(courtProvider).selectedCourtId != null) {
     if (ref.watch(courtProvider).selectedCourtNumber != null) {
       appointments = ref
           .watch(reservationProvider)
@@ -72,6 +119,18 @@ class _WeekViewWidgetState extends ConsumerState<WeekViewWidget> {
           .toList();
     }
     return CustomDataSource(appointments);
+  }
+
+  List<TimeRegion> _getTimeRegions() {
+    final List<TimeRegion> regions = <TimeRegion>[];
+    regions.add(TimeRegion(
+      startTime: DateTime(2020, 5, 29, 00, 0, 0),
+      endTime: DateTime(2020, 5, 29, 24, 0, 0),
+      recurrenceRule: 'FREQ=WEEKLY;INTERVAL=1;BYDAY=SAT,SUN',
+      color: const Color(0xffbd3d3d3),
+    ));
+
+    return regions;
   }
 }
 

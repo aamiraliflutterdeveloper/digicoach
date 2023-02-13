@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:clients_digcoach/core/responsive.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 Future<void> buildDialog(
@@ -19,6 +18,7 @@ Future<void> buildDialog(
     ),
   );
 }
+
 EdgeInsets padding(BuildContext context,
     {double? maxBreakingPoint,
       double? minPadding,
@@ -41,3 +41,21 @@ EdgeInsets padding(BuildContext context,
 
   return EdgeInsets.symmetric(horizontal: horizontal, vertical: padding);
 }
+
+bool urlValidation(String url) => Uri.tryParse(url)?.hasAbsolutePath ?? false;
+
+Row requiredText(String text) => Row(
+  children: [
+    const Text('*', style: TextStyle(color: Colors.red, fontSize: 16)),
+    const Padding(
+      padding: EdgeInsets.all(3.0),
+    ),
+    Text(
+      text,
+      style: const TextStyle(
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+      ),
+    ),
+  ],
+);

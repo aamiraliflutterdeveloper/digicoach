@@ -7,21 +7,21 @@ class Reservation {
   final String? courtId;
   final int courtNumber;
   final String clubId;
-  final String? coachId;
+  final String coachId;
   final DateTime startTime;
   final DateTime endTime;
-  final ReservationStatus status;
+  final ReservationStatus? status;
   final String title;
 
   const Reservation({
     required this.id,
-     this.courtId,
+    this.courtId,
     required this.clubId,
     required this.startTime,
     required this.endTime,
-    required this.status,
+     this.status,
     required this.title,
-    this.coachId,
+    required this.coachId,
     required this.courtNumber,
   });
 
@@ -31,7 +31,7 @@ class Reservation {
         clubId: json['clubId'],
         startTime: DateTime.parse(json['startTime']),
         endTime: DateTime.parse(json['endTime']),
-        status: ReservationStatus.values[json['status']],
+        status: ReservationStatus.fromString(json['status']),
         title: json['title'],
         coachId: json['coachId'],
         courtNumber: json['courtNumber'],
@@ -43,7 +43,7 @@ class Reservation {
         'clubId': clubId,
         'startTime': startTime.toIso8601String(),
         'endTime': endTime.toIso8601String(),
-        'status': status.index,
+        'status': status.toString(),
         'title': title,
         'coachId': coachId,
         'courtNumber': courtNumber,

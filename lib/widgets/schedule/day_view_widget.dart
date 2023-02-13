@@ -12,7 +12,9 @@ import '../../providers/reservation_provider.dart';
 import '../form_dialog_widget.dart';
 
 class DayViewWidget extends ConsumerStatefulWidget {
-  const DayViewWidget({super.key});
+  const DayViewWidget({super.key, required this.isCoachView});
+
+  final bool isCoachView;
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() => _DayViewWidgetState();
@@ -27,48 +29,28 @@ class _DayViewWidgetState extends ConsumerState<DayViewWidget> {
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
-   // return MouseRegionWidget(
-   //    controller: _controller,
-   //    child: SfCalendar(
-   //      showDatePickerButton: true,
-   //      controller: _controller,
-   //      view: CalendarView.timelineWeek,
-   //      dataSource: _addResources(),
-   //      onTap: ( details) {
-   //        if (details.targetElement == CalendarElement.calendarCell) {
-   //          final dateTime = details.date;
-   //          final coachId = details.resource?.id;
-   //
-   //          buildDialog(
-   //            context,
-   //            child: FormDialogWidget(
-   //              dateTime: dateTime,
-   //              coachId: coachId,
-   //              courtNumber: ref.watch(courtProvider).selectedCourtId,
-   //            ),
-   //
-   //          );
-   //        }
-   //      },
-   //    ),
-   //  );
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        Positioned.fill(
-          top: -height / 8,
-          child: buildDayViewCalendar(),
-        ),
-        Positioned.fill(
-          bottom: height / 1.7,
-          child: buildCourts(),
-        ),
-        Positioned.fill(
-          bottom: (height / 1.3),
-          child: buildCourtsArrow(),
-        ),
-      ],
-    );
+    return ref.watch(reservationProvider).isLoading
+        ? const Expanded(
+            child: Center(
+              child: CircularProgressIndicator.adaptive(),
+            ),
+          )
+        : Expanded(
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Positioned.fill(
+                  top: -height / 8,
+                  child: buildDayViewCalendar(),
+                ),
+                Positioned.fill(bottom: height / 2, child: buildCourts()),
+                Positioned.fill(
+                  bottom: (height / 1.5),
+                  child: buildCourtsArrow(),
+                ),
+              ],
+            ),
+          );
   }
 
   Widget buildDayViewCalendar() => MouseRegionWidget(
@@ -79,29 +61,40 @@ class _DayViewWidgetState extends ConsumerState<DayViewWidget> {
           viewHeaderHeight: 0,
           view: CalendarView.workWeek,
           controller: _controller,
-          dataSource: _getCalendarDataSource(),
+          timeSlotViewSettings: const TimeSlotViewSettings(
+              timeInterval: Duration(minutes: 30), timeFormat: 'h:mm'),
+          dataSource: widget.isCoachView
+              ? _getCoachesCalendarDataSource()
+              : _getCourtsCalendarDataSource(),
           showDatePickerButton: true,
-          showNavigationArrow: true,
-          allowAppointmentResize: true,
+          showNavigationArrow: false,
           allowViewNavigation: true,
-          onTap: (details) {
-            if (details.targetElement == CalendarElement.calendarCell) {
-              final dateTime = details.date;
-              final coachId = details.resource?.id;
-              print('day ---> $coachId');
-              final courtNumber = _controller.selectedDate!.difference(_controller.displayDate!).inDays+1;
-              buildDialog(
-                context,
-                child: FormDialogWidget(
-                  dateTime: dateTime,
-                  courtNumber: courtNumber.toString(),
-                  coachId: coachId,
-                ),
-              );
-            }
-          },
+          allowDragAndDrop: true,
+          onTap: _onTap,
         ),
       );
+
+  void _onTap(CalendarTapDetails details) {
+    if (details.targetElement == CalendarElement.calendarCell) {
+      final dateTime = details.date;
+      final coachId = details.resource?.id;
+      print('day ---> $coachId');
+      final courtNumber = _controller.selectedDate!
+              .difference(_controller.displayDate!)
+              .inDays +
+          1;
+      print('courtNumber ---> $courtNumber');
+
+      buildDialog(
+        context,
+        child: FormDialogWidget(
+          dateTime: dateTime,
+          courtNumber: courtNumber,
+          coachId: '$coachId',
+        ),
+      );
+    }
+  }
 
   Widget buildCourts() {
     final responsive = Responsive();
@@ -146,14 +139,18 @@ class _DayViewWidgetState extends ConsumerState<DayViewWidget> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const SizedBox(width: 50),
-          currentPage.round() == 0 ? const SizedBox() : IconButton(
-            onPressed: previousPage,
-            icon: const Icon(Icons.arrow_back_ios),
-          ),
-          currentPage.round() == courtLength - 1 ? const SizedBox() :     IconButton(
-            onPressed: nextPage,
-            icon: const Icon(Icons.arrow_forward_ios),
-          ),
+          currentPage.round() == 0
+              ? const SizedBox()
+              : IconButton(
+                  onPressed: previousPage,
+                  icon: const Icon(Icons.arrow_back_ios),
+                ),
+          currentPage.round() == courtLength - 1
+              ? const SizedBox()
+              : IconButton(
+                  onPressed: nextPage,
+                  icon: const Icon(Icons.arrow_forward_ios),
+                ),
         ],
       );
 
@@ -162,16 +159,22 @@ class _DayViewWidgetState extends ConsumerState<DayViewWidget> {
     return courts.length > 5 ? courts.length - 4 : 1;
   }
 
-  void previousPage() => pageController.animateToPage(currentPage.round() - 5,
-      duration: const Duration(milliseconds: 200), curve: Curves.bounceIn);
+  void nextPage() {
+    pageController.animateToPage(currentPage.round() + 5,
+        duration: const Duration(milliseconds: 200), curve: Curves.bounceIn);
+    _controller.forward!();
+  }
 
-  void nextPage() => pageController.animateToPage(currentPage.round() + 5,
-      duration: const Duration(milliseconds: 200), curve: Curves.bounceIn);
+  void previousPage() {
+    pageController.animateToPage(currentPage.round() - 5,
+        duration: const Duration(milliseconds: 200), curve: Curves.bounceIn);
+    _controller.backward!();
+  }
 
-  DayAppointmentDataSource _getCalendarDataSource() {
+  DayAppointmentDataSource _getCoachesCalendarDataSource() {
     final appointments = ref
         .watch(reservationProvider)
-        .reservationsByClubId
+        .reservationsByCoachId
         .map((e) => Appointment(
               startTime: e.startTime,
               endTime: e.endTime,
@@ -182,48 +185,25 @@ class _DayViewWidgetState extends ConsumerState<DayViewWidget> {
 
     return DayAppointmentDataSource(appointments);
   }
-  _CalenderResource _addResources() {
+
+  DayAppointmentDataSource _getCourtsCalendarDataSource() {
     final appointments = ref
         .watch(reservationProvider)
-        .reservationsByClubId
-        .map(
-          (reservation) => Appointment(
-          startTime: reservation.startTime,
-          endTime: reservation.endTime,
-          color: kPrimaryColor,
-          startTimeZone: '',
-          endTimeZone: '',
-          subject: reservation.title,
-          resourceIds: [reservation.coachId!]),
-    )
+        .reservationsByCourtNumber
+        .map((e) => Appointment(
+              startTime: e.startTime,
+              endTime: e.endTime,
+              color: kPrimaryColor,
+              subject: e.title,
+            ))
         .toList();
 
-    final employeeCollection = ref
-        .watch(coachProvider)
-        .coachesByClubId
-        .map(
-          (coach) => CalendarResource(
-        color: kPrimaryColor,
-        displayName: coach.name,
-        id: coach.id,
-        image: NetworkImage(coach.image),
-      ),
-    )
-        .toList();
-    return _CalenderResource(employeeCollection, appointments);
+    return DayAppointmentDataSource(appointments);
   }
-
 }
 
 class DayAppointmentDataSource extends CalendarDataSource {
   DayAppointmentDataSource(List<Appointment> source) {
-    appointments = source;
-  }
-}
-class _CalenderResource extends CalendarDataSource {
-  _CalenderResource(
-      List<CalendarResource> resourceColl, List<Appointment> source) {
-    resources = resourceColl;
     appointments = source;
   }
 }

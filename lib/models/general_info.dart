@@ -1,42 +1,42 @@
 class GeneralInfo {
   final String id;
   final String name;
-  final String ceoName;
-  final String surName;
+  final String? ceoName;
+  final String? surName;
   final String phone;
-  final String description;
-  final String street;
-  final String city;
-  final String country;
-  final String postalCode;
-  final String url;
-  final String email;
-  final String instagram;
-  final String facebook;
-  final String tiktok;
-  final String twitter;
-  final bool active;
-  final List<String> images;
+  final String? description;
+  final String? street;
+  final String? city;
+  final String? country;
+  final String? postalCode;
+  final String? url;
+  final String? email;
+  final String? instagram;
+  final String? facebook;
+  final String? tiktok;
+  final String? twitter;
+  final bool? active;
+  final List<String>? images;
 
   const GeneralInfo({
-    required this.id,
-    required this.name,
-    required this.ceoName,
-    required this.surName,
-    required this.phone,
-    required this.description,
-    required this.street,
-    required this.city,
-    required this.country,
-    required this.postalCode,
-    required this.url,
-    required this.email,
-    required this.instagram,
-    required this.facebook,
-    required this.tiktok,
-    required this.twitter,
+     required this.id,
+     required this.name,
+     this.ceoName,
+     this.surName,
+     required this.phone,
+     this.description,
+     this.street,
+      this.city,
+     this.country,
+     this.postalCode,
+     this.url,
+     this.email,
+     this.instagram,
+     this.facebook,
+     this.tiktok,
+     this.twitter,
     this.active = true,
-    required this.images,
+     this.images,
   });
 
   factory GeneralInfo.fromJson(Map<String, dynamic> json) => GeneralInfo(

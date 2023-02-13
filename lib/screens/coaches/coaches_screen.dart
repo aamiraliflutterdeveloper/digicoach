@@ -1,25 +1,35 @@
-import 'package:clients_digcoach/core/constants/colors.dart';
-import 'package:clients_digcoach/providers/club_provider.dart';
+
+import 'package:clients_digcoach/providers/coach_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/constants/colors.dart';
+import '../../providers/club_provider.dart';
 import '../../widgets/club_coach_card_widget.dart';
 import '../../widgets/convex_tab_widget.dart';
+import '../clubs/clubs_screen.dart';
 
-class ClubsScreen extends ConsumerWidget {
-  const ClubsScreen({super.key});
+class CoachesScreen extends ConsumerStatefulWidget {
+  const CoachesScreen({
+    Key? key,
+  }) : super(key: key);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    const titles = ['Clubs', 'Managers'];
-    const widgets = [ClubCoachCardWidget(isCoach: false), ManagersCardWidget()];
+  ConsumerState<ConsumerStatefulWidget> createState() => _CoachesScreenState();
+}
+
+class _CoachesScreenState extends ConsumerState<CoachesScreen> {
+  @override
+  Widget build(BuildContext context) {
+    const titles = ['Coaches', 'Managers'];
+    const widgets = [ClubCoachCardWidget(isCoach: true), ManagersCardWidget()];
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
         children: [
           const SizedBox(height: 50),
           const Text(
-            'Clubs information and permissions',
+            'Coaches information and permissions',
             style: TextStyle(
               fontSize: 25,
               color: kPrimaryColor,
@@ -32,13 +42,12 @@ class ClubsScreen extends ConsumerWidget {
             child: Row(
               children: List.generate(
                 titles.length,
-                (index) => ConvexTabWidget(
+                    (index) => ConvexTabWidget(
                   index: index,
                   titles: titles,
-                  currentIndex:
-                      ref.watch(clubProvider).coachManagerCurrentIndex,
+                  currentIndex: ref.watch(coachProvider).coachManagerCurrentIndex,
                   onTap: () =>
-                      ref.read(clubProvider).coachManagerCurrentIndex = index,
+                  ref.read(coachProvider).coachManagerCurrentIndex = index,
                 ),
               ),
             ),
@@ -52,20 +61,4 @@ class ClubsScreen extends ConsumerWidget {
   }
 }
 
-class ManagersCardWidget extends StatelessWidget {
-  const ManagersCardWidget({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Text(
-        'Managers',
-        style: TextStyle(
-          fontSize: 30,
-          fontWeight: FontWeight.bold,
-          color: kPrimaryColor,
-        ),
-      ),
-    );
-  }
-}

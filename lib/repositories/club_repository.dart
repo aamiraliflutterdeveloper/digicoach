@@ -1,8 +1,12 @@
+import 'package:clients_digcoach/models/day.dart';
 import 'package:clients_digcoach/models/general_info.dart';
 import 'package:clients_digcoach/repositories/days_repository.dart';
 
+import '../core/enums/days_week.dart';
+import '../models/opening_hours.dart';
 import 'coach_repository.dart';
 import 'court_repository.dart';
+import 'opening_hours_repository.dart';
 import 'reservation_repository.dart';
 import '../models/club.dart';
 
@@ -30,7 +34,7 @@ List<Club> clubs = [
       facebook: 'facebook',
       tiktok: 'tiktok',
       twitter: 'twitter',
-      images: ['images'],
+      images: ['https://images.unsplash.com/photo-1613685044678-0a9ae422cf5a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MzF8fGZpdG5lc3N8ZW58MHx8MHx8&auto=format&fit=crop&w=500&q=60'],
     ),
     holidays: [],
     amenities: [
@@ -73,7 +77,7 @@ List<Club> clubs = [
       facebook: 'facebook',
       tiktok: 'tiktok',
       twitter: 'twitter',
-      images: ['images'],
+      images: ['https://images.unsplash.com/photo-1613685044678-0a9ae422cf5a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MzF8fGZpdG5lc3N8ZW58MHx8MHx8&auto=format&fit=crop&w=500&q=60'],
     ),
     holidays: [],
     amenities: [
@@ -116,7 +120,7 @@ List<Club> clubs = [
       facebook: 'facebook',
       tiktok: 'tiktok',
       twitter: 'twitter',
-      images: ['images'],
+      images: ['https://images.unsplash.com/photo-1613685044678-0a9ae422cf5a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MzF8fGZpdG5lc3N8ZW58MHx8MHx8&auto=format&fit=crop&w=500&q=60'],
     ),
     holidays: [],
     amenities: [
@@ -139,12 +143,7 @@ List<Club> clubs = [
 ];
 
 class ClubRepository {
-  // Future<Club> getClub(String id) async {
-  //   return Future.delayed(
-  //     const Duration(seconds: 1),
-  //     () => clubs.firstWhere((club) => club.id == id),
-  //   );
-  // }
+
 
   Future<String> getClubId() async {
     return Future.delayed(
@@ -160,10 +159,22 @@ class ClubRepository {
     );
   }
 
+  Future<void> addClub(Club club) async {
+    return Future.delayed(
+      const Duration(seconds: 1),
+      () => clubs.add(club),
+    );
+  }
+
   Future<List<Club>> getClubs() async {
     return Future.delayed(
       const Duration(seconds: 1),
       () => clubs,
     );
   }
+  Future<List<OpeningHours>> getOpeningHoursByClubId(String id)async{
+    Future.delayed(const Duration(seconds: 1));
+    return openingHours.where((element) => element.clubId == id).toList();
+  }
+
 }

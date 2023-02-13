@@ -1,12 +1,16 @@
+import 'package:clients_digcoach/core/constants/functions.dart';
 import 'package:clients_digcoach/providers/schedule_provider.dart';
-import 'package:clients_digcoach/screens/schedule/coaches_view_screen.dart';
-import 'package:clients_digcoach/screens/schedule/day_vew_screeen.dart';
-import 'package:clients_digcoach/screens/schedule/heat_map_screen.dart';
-import 'package:clients_digcoach/screens/schedule/weeK_view_screen.dart';
+import 'package:clients_digcoach/screens/schedule/coaches_calendar_views.dart';
+import 'package:clients_digcoach/screens/schedule/courts_calendar_views.dart';
+import 'package:clients_digcoach/screens/schedule/players_calendar_views.dart';
+import 'package:clients_digcoach/widgets/convex_tab_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../widgets/tab_widget.dart';
+import '../../providers/club_provider.dart';
+import '../../providers/coach_provider.dart';
+import '../../providers/reservation_provider.dart';
+import 'groups_calendar_views.dart';
 
 class ScheduleScreen extends ConsumerStatefulWidget {
   const ScheduleScreen({super.key});
@@ -16,44 +20,42 @@ class ScheduleScreen extends ConsumerStatefulWidget {
 }
 
 class _HomePageState extends ConsumerState<ScheduleScreen> {
-  final _titles = const ['Heat Map', 'Day View', 'Week View', 'Coaches View'];
+
+final _titles = const ['Courts', 'Coaches', 'Groups', 'Players'];
   final _widgets = const [
-    HeatMapScreen(),
-    DayViewScreen(),
-    WeekViewScreen(),
-    CoachesViewScreen(),
+    CourtsCalendarViews(),
+    CoachesCalendarViews(),
+    GroupsCalendarViews(),
+    PlayersCalendarViews(),
   ];
 
   @override
   Widget build(BuildContext context) {
-    final provider = ref.watch(scheduleProvider);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              const Spacer(),
               ...List.generate(
                 _titles.length,
                 (index) => Expanded(
-                  flex: 8,
-                  child: TabWidget(
+                  child: ConvexTabWidget(
                     index: index,
-                    title: _titles[index],
-                    currentIndex: provider.currentIndex,
-                    onTap: () => provider.currentIndex = index,
-                    horizontalPadding: 1,
+                    titles: _titles,
+                    currentIndex: ref.watch(scheduleProvider).currentIndex,
+                    onTap: () => ref.read(scheduleProvider).currentIndex = index,
                   ),
                 ),
+
               ),
               const Spacer(),
             ],
           ),
-          const SizedBox(height: 32),
-          _widgets[provider.currentIndex]
+          const SizedBox(height: 16),
+          _widgets[ref.watch(scheduleProvider).currentIndex]
         ],
       ),
     );

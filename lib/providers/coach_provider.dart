@@ -9,23 +9,25 @@ final coachProvider = ChangeNotifierProvider((ref) => CoachProvider());
 class CoachProvider extends ChangeNotifier {
   final CoachRepository _coachRepository = CoachRepository();
 
+  int _coachesViewIndex = 0;
+  int _coachManagerCurrentIndex = 0;
   String? _selectedCoachId;
 
   List<Coach> _coaches = [];
   List<Coach> _coachesByClubId = [];
 
+  bool _isLoading = false;
+
+  /// getters
   List<Coach> get coaches => _coaches;
 
   List<Coach> get coachesByClubId => _coachesByClubId;
 
   String? get selectedCoachId => _selectedCoachId;
 
-
-  bool _isLoading = false;
-
-  /// getters
-
   bool get isLoading => _isLoading;
+  int get coachesViewIndex => _coachesViewIndex;
+  int get coachManagerCurrentIndex => _coachManagerCurrentIndex;
 
   /// setters
   void _loading(bool isLoading) {
@@ -38,13 +40,23 @@ class CoachProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  set coachesViewIndex(int value) {
+    _coachesViewIndex = value;
+    notifyListeners();
+  }
 
+  set coachManagerCurrentIndex(int value) {
+    _coachManagerCurrentIndex = value;
+    notifyListeners();
+  }
 
-  // Future<String?> getCoachId() async {
-  //   _selectedCoachId = await _coachRepository.getCoachId();
-  //   notifyListeners();
-  //   return _selectedCoachId;
-  // }
+  /// methods
+
+  Future<String?> getCoachId(String id) async {
+    selectedCoachId = await _coachRepository.getCoachId(id);
+    notifyListeners();
+    return selectedCoachId;
+  }
 
   Future<List<Coach>> getCoaches() async {
     _coaches = await _coachRepository.getCoaches();

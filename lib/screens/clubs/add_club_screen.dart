@@ -8,6 +8,8 @@ import 'package:clients_digcoach/widgets/tab_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../providers/opening_hours_provider.dart';
+
 class AddClubScreen extends ConsumerStatefulWidget {
   const AddClubScreen({super.key});
 
@@ -16,7 +18,6 @@ class AddClubScreen extends ConsumerStatefulWidget {
 }
 
 class _AddClubScreenState extends ConsumerState<AddClubScreen> {
-  // int currentIndex = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -41,23 +42,18 @@ class _AddClubScreenState extends ConsumerState<AddClubScreen> {
             const SizedBox(height: 40),
             Row(
               children: [
-                const Spacer(),
                 ...List.generate(
-                  5,
+                  titles.length,
                   (index) => Expanded(
-                    flex: 8,
                     child: TabWidget(
                       index: index,
                       title: titles[index],
                       currentIndex:ref.watch(clubProvider).addClubCurrentTap ,
-                      onTap: () =>ref.read(clubProvider).addClubCurrentTap  = index,
+                      onTap: () => ref.read(clubProvider).addClubCurrentTap  = index,
                       borderRadius: BorderRadius.circular(30),
-                      verticalPadding: 10,
-                      horizontalPadding: 10,
                     ),
                   ),
                 ),
-                const Spacer(),
               ],
             ),
             Expanded(flex: 6, child: widgets[ref.watch(clubProvider).addClubCurrentTap]),

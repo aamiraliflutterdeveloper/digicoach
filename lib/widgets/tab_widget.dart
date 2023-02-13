@@ -9,27 +9,25 @@ class TabWidget extends StatelessWidget {
     required this.title,
     this.onTap,
     this.borderRadius,
-    this.verticalPadding, required this.horizontalPadding,
   });
 
   final int index;
   final int currentIndex;
-  final double? verticalPadding;
-  final double horizontalPadding;
   final String title;
   final GestureTapCallback? onTap;
   final BorderRadius? borderRadius;
 
   @override
   Widget build(BuildContext context) => InkWell(
-        borderRadius: borderRadius,
+        borderRadius: borderRadius ?? BorderRadius.circular(15),
         onTap: onTap,
         child: Container(
-          padding: EdgeInsets.symmetric(vertical: verticalPadding??4,horizontal: horizontalPadding),
+          height:30,
+          width: 200,
           alignment: Alignment.center,
           decoration: BoxDecoration(
-              borderRadius: borderRadius,
               color: currentIndex == index ? kPrimaryColor : Colors.white,
+              borderRadius: borderRadius ?? BorderRadius.circular(15),
               border: Border.all(color: kPrimaryColor)),
           child: Text(
             title,

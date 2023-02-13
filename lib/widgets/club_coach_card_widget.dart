@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
-import '../../core/constants/colors.dart';
-import '../../screens/clubs/add_club_screen.dart';
-import 'club_data_grid_widget.dart';
+import '../core/constants/colors.dart';
+import '../screens/clubs/add_club_screen.dart';
+import 'clubs/club_data_grid_widget.dart';
 
-class ClubCardWidget extends StatelessWidget {
-  const ClubCardWidget({super.key});
+class ClubCoachCardWidget extends StatelessWidget {
+  const ClubCoachCardWidget({super.key, required this.isCoach});
+
+  final bool isCoach;
 
   @override
   Widget build(BuildContext context) => Card(
@@ -22,9 +24,9 @@ class ClubCardWidget extends StatelessWidget {
               Row(
                 children: [
                   const Spacer(flex: 5),
-                  const Text(
-                    'Clubs',
-                    style: TextStyle(
+                  Text(
+                    isCoach ? 'Coaches' : 'Clubs',
+                    style: const TextStyle(
                       color: kPrimaryColor,
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -38,7 +40,7 @@ class ClubCardWidget extends StatelessWidget {
                       ),
                       backgroundColor: kPrimaryColor,
                     ),
-                    label: const Text('New Club'),
+                    label: Text(isCoach ? 'New Coach' : 'New Club'),
                     icon: const CircleAvatar(
                       radius: 10,
                       backgroundColor: Colors.white,
@@ -49,17 +51,20 @@ class ClubCardWidget extends StatelessWidget {
                       ),
                     ),
                     onPressed: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const AddClubScreen(),
-                        ),),
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const AddClubScreen(),
+                      ),
+                    ),
                   ),
                 ],
               ),
               const SizedBox(height: 32),
-              const Text(
-                'Modify or create new clubs',
-                style: TextStyle(
+              Text(
+                isCoach
+                    ? 'Modify or create new coaches'
+                    : 'Modify or create new clubs',
+                style: const TextStyle(
                   color: kPrimaryColor,
                   fontWeight: FontWeight.bold,
                 ),

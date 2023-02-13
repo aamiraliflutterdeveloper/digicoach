@@ -8,11 +8,16 @@ class TextFormFieldWidget extends StatelessWidget {
     this.onFieldSubmitted,
     this.hintText,
     this.dateOnPressed,
+    this.onEditingComplete,
     this.timeOnPressed,
     this.isSuffix = false,
     this.isRequired = false,
     this.maxLines = 1,
-    this.border, this.inputFormatters, this.validator,
+    this.border,
+    this.inputFormatters,
+    this.validator,
+    this.focusNode,
+    this.autovalidateMode, this.onChanged,
   });
 
   final TextEditingController? controller;
@@ -20,40 +25,50 @@ class TextFormFieldWidget extends StatelessWidget {
   final String? hintText;
   final VoidCallback? dateOnPressed;
   final VoidCallback? timeOnPressed;
+  final VoidCallback? onEditingComplete;
   final bool isSuffix;
   final bool isRequired;
   final int maxLines;
   final InputBorder? border;
- final List<TextInputFormatter>? inputFormatters;
+  final List<TextInputFormatter>? inputFormatters;
   final FormFieldValidator<String>? validator;
+  final FocusNode? focusNode;
+  final AutovalidateMode? autovalidateMode;
+  final ValueChanged<String>? onChanged;
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      onChanged:onChanged,
+      autovalidateMode: autovalidateMode,
       style: const TextStyle(color: Colors.black),
       readOnly: isSuffix,
       maxLines: maxLines,
+      focusNode: focusNode,
+      onEditingComplete: onEditingComplete,
       decoration: InputDecoration(
         hintText: hintText,
         suffixIcon: isSuffix
             ? Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                      onPressed: dateOnPressed,
-                      icon: const Icon(Icons.date_range)),
-                  IconButton(
-                      onPressed: timeOnPressed,
-                      icon: const Icon(Icons.access_time)),
-                ],
-              )
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+                onPressed: dateOnPressed,
+                icon: const Icon(Icons.date_range)),
+            IconButton(
+                onPressed: timeOnPressed,
+                icon: const Icon(Icons.access_time)),
+          ],
+        )
             : null,
         border: border ?? const OutlineInputBorder(),
       ),
       onFieldSubmitted: onFieldSubmitted,
-      validator:validator??( isSuffix || isRequired
-          ? null
-          : (title) => title != null && title.isEmpty ? 'field required' : null),
+      validator: validator ??
+          (isSuffix || !isRequired
+              ? null
+              : (title) =>
+          title == null || title.isEmpty ? 'field required' : null),
       controller: controller,
       inputFormatters: inputFormatters,
     );

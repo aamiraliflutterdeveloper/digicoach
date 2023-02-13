@@ -1,4 +1,6 @@
 import 'package:clients_digcoach/providers/club_provider.dart';
+import 'package:clients_digcoach/providers/coach_provider.dart';
+import 'package:clients_digcoach/providers/court_provider.dart';
 import 'package:clients_digcoach/providers/reservation_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,7 +10,9 @@ import '../../core/constants/colors.dart';
 import '../../providers/schedule_provider.dart';
 
 class HeatMapWidget extends ConsumerStatefulWidget {
-  const HeatMapWidget({super.key});
+  const HeatMapWidget({super.key, required this.isCoachView});
+
+  final bool isCoachView;
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() => _HeatMapWidgetState();
@@ -17,62 +21,75 @@ class HeatMapWidget extends ConsumerStatefulWidget {
 class _HeatMapWidgetState extends ConsumerState<HeatMapWidget> {
   @override
   Widget build(BuildContext context) {
-    return  Column(
-      children: [
-           Expanded(
-          child: SfCalendar(
-            view: CalendarView.month,
-            showDatePickerButton: true,
-            showNavigationArrow: true,
-            monthViewSettings: const MonthViewSettings(
-              showTrailingAndLeadingDates: false,
+    return ref.watch(reservationProvider).isLoading
+        ? const Expanded(
+            child: Center(
+              child: CircularProgressIndicator.adaptive(),
             ),
-            monthCellBuilder: _monthCellBuilder,
-            allowAppointmentResize: true,
-            allowViewNavigation: true,
-            onTap: (details) {
-              if (details.targetElement == CalendarElement.appointment ||
-                  details.targetElement == CalendarElement.calendarCell) {
-                ref.watch(scheduleProvider).currentIndex = 1;
-              }
-            },
-          ),
-        ),
-        Container(
-          margin: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-          height: 70,
-          width: MediaQuery.of(context).size.width * 0.7,
-          child: Center(
+          )
+        : Expanded(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: const <Widget>[
-                    Text('Less'),
-                    Text('More'),
-                  ],
+              children: [
+                Expanded(
+                  child: SfCalendar(
+                    view: CalendarView.month,
+                    firstDayOfWeek: 1,
+                    showDatePickerButton: true,
+                    showNavigationArrow: true,
+                    monthViewSettings: const MonthViewSettings(
+                      showTrailingAndLeadingDates: false,
+                    ),
+                    monthCellBuilder: _monthCellBuilder,
+                    allowAppointmentResize: true,
+                    allowViewNavigation: true,
+                    onTap: (details) {
+                      if (details.targetElement ==
+                              CalendarElement.appointment ||
+                          details.targetElement ==
+                              CalendarElement.calendarCell) {
+                        widget.isCoachView
+                            ? ref.watch(coachProvider).coachesViewIndex
+                            : ref.watch(courtProvider).courtsViewIndex = 1;
+                      }
+                    },
+                  ),
                 ),
                 Container(
-                  height: 20,
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: <Color>[
-                        kLightGrey,
-                        kLightGreen,
-                        kMidGreen,
-                        kDarkGreen,
-                        kDarkerGreen,
+                  margin: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                  height: 70,
+                  width: MediaQuery.of(context).size.width * 0.7,
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: const <Widget>[
+                            Text('Less'),
+                            Text('More'),
+                          ],
+                        ),
+                        Container(
+                          height: 20,
+                          decoration: const BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: <Color>[
+                                kLightGrey,
+                                kLightGreen,
+                                kMidGreen,
+                                kDarkGreen,
+                                kDarkerGreen,
+                              ],
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
-                ),
+                )
               ],
             ),
-          ),
-        )
-      ],
-    );
+          );
   }
 
   /// Returns the builder for month cell.
@@ -97,7 +114,25 @@ class _HeatMapWidgetState extends ConsumerState<HeatMapWidget> {
 
   /// Returns the cell background color based on the date
   Color _getMonthCellBackgroundColor(DateTime date) {
-    final int reservationCount = ref
+    int reservation =
+        widget.isCoachView ? _coachReservation(date) :
+        _courtReservation(date);
+
+    if (reservation == 0) {
+      return kLightGrey;
+    } else if (reservation > 0 && reservation <= 2) {
+      return kLightGreen;
+    } else if (reservation > 2 && reservation <= 4) {
+      return kMidGreen;
+    } else if (reservation > 4 && reservation <= 6) {
+      return kDarkGreen;
+    } else {
+      return kDarkerGreen;
+    }
+  }
+
+  int _courtReservation(DateTime date) {
+    final int courtReservation = ref
         .watch(reservationProvider)
         .reservationsByClubId
         .where((reservation) =>
@@ -105,18 +140,19 @@ class _HeatMapWidgetState extends ConsumerState<HeatMapWidget> {
             reservation.startTime.month == date.month &&
             reservation.startTime.year == date.year)
         .length;
+    return courtReservation;
+  }
 
-    if (reservationCount == 0) {
-      return kLightGrey;
-    } else if (reservationCount > 0 && reservationCount <= 2) {
-      return kLightGreen;
-    } else if (reservationCount > 2 && reservationCount <= 4) {
-      return kMidGreen;
-    } else if (reservationCount > 4 && reservationCount <= 6) {
-      return kDarkGreen;
-    } else {
-      return kDarkerGreen;
-    }
+  int _coachReservation(DateTime date) {
+    final int coachReservation = ref
+        .watch(reservationProvider)
+        .reservationsByCoachId
+        .where((reservation) =>
+            reservation.startTime.day == date.day &&
+            reservation.startTime.month == date.month &&
+            reservation.startTime.year == date.year)
+        .length;
+    return coachReservation;
   }
 
   /// Returns the cell  text color based on the cell background color

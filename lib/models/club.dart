@@ -64,4 +64,25 @@ class Club {
         'holidays': holidays.map((e) => e.toJson()).toList(),
         'amenities': amenities.map((e) => e).toList(),
       };
+
+  Club copyWith({
+    final String? id,
+    final GeneralInfo? generalInfo,
+    final List<Court>? courts,
+    final List<Coach>? coaches,
+    final List<Reservation>? reservations,
+    final List<Day>? days,
+    final List<Holiday>? holidays,
+    final List<String>? amenities,
+  }) =>
+      Club(
+        id: id ?? this.id,
+        generalInfo: generalInfo ?? this.generalInfo,
+        courts: courts ?? this.courts,
+        coaches: coaches ?? this.coaches,
+        reservations: reservations ?? this.reservations,
+        days: days ?? this.days,
+        holidays: holidays ?? this.holidays,
+        amenities: amenities ?? this.amenities,
+      );
 }

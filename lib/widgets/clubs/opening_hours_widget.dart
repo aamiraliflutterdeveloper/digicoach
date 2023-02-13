@@ -1,35 +1,83 @@
-import 'package:brasil_fields/brasil_fields.dart';
-import 'package:clients_digcoach/models/opening_hours.dart';
-import 'package:clients_digcoach/repositories/opening_hours_repository.dart';
-import 'package:clients_digcoach/widgets/text_form_field_widget.dart';
+import 'package:clients_digcoach/providers/club_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/functions.dart';
-import 'from_to_field_widget.dart';
+import '../../core/enums/days_week.dart';
+import '../../models/opening_hours.dart';
+import 'from_to_field_opening_hours_widget.dart';
 
-class OpeningHoursWidget extends StatefulWidget {
+class OpeningHoursWidget extends ConsumerStatefulWidget {
   const OpeningHoursWidget({super.key});
 
   @override
-  State<OpeningHoursWidget> createState() => _OpeningHoursWidgetState();
+  ConsumerState<ConsumerStatefulWidget> createState() =>
+      _OpeningHoursWidgetState();
 }
 
-class _OpeningHoursWidgetState extends State<OpeningHoursWidget> {
-  final List<TextEditingController> fromControllers = [];
-  final List<TextEditingController> toControllers = [];
-
-  // final mondayToController = TextEditingController();
-  DateTime parsedDateFrom = DateTime.parse('2022-03-20 09:00');
-  DateTime parsedDateTo = DateTime.parse('2022-03-20 20:00');
-
-  List<OpeningHours> openHours = [];
-  bool isActive = true;
-
+class _OpeningHoursWidgetState extends ConsumerState<OpeningHoursWidget> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback(
+        (_) async => await ref.read(clubProvider).getOpeningHoursByClubId());
   }
+
+  @override
+  Widget build(BuildContext context) {
+    final openingHoursByClubId = ref.watch(clubProvider).openingHoursByClubId;
+    return ref.watch(clubProvider).isLoading
+        ? const CircularProgressIndicator()
+        : ListView(
+            padding: padding(context),
+            children: List.generate(
+              DaysWeek.values.length,
+                  (index) {
+                final dayWeek = DaysWeek.values[index];
+                return DayOpeningHourWidget(
+                  items: openingHoursByClubId
+                      .where((element) => element.daysWeek == dayWeek)
+                      .toList(),
+                  day: dayWeek.toString(),
+                  addTime: () => _addOpeningHour(openingHoursByClubId, dayWeek),
+                );
+              },
+            ),
+          );
+  }
+
+  void _addOpeningHour(List<OpeningHours> openingHoursByClubId, DaysWeek dayWeek) {
+    openingHoursByClubId.add(
+      OpeningHours(
+        id: '${openingHoursByClubId.length + 1}',
+        daysWeek: dayWeek,
+        from: DateTime.now().add(const Duration(hours: 1)),
+        to: DateTime.now().add(const Duration(hours: 2)),
+        clubId: ref.watch(clubProvider).selectedClubId!,
+      ),
+    );
+    setState(() {});
+  }
+}
+
+class DayOpeningHourWidget extends StatefulWidget {
+  const DayOpeningHourWidget({
+    super.key,
+    required this.items,
+    required this.day,
+    this.addTime,
+  });
+
+  final List items;
+  final String day;
+  final VoidCallback? addTime;
+
+  @override
+  State<DayOpeningHourWidget> createState() => _DayOpeningHourWidgetState();
+}
+
+class _DayOpeningHourWidgetState extends State<DayOpeningHourWidget> {
+  bool isActive = true;
 
   @override
   Widget build(BuildContext context) {
@@ -37,63 +85,38 @@ class _OpeningHoursWidgetState extends State<OpeningHoursWidget> {
       fontSize: 16,
       fontWeight: FontWeight.bold,
     );
-    return ListView(
-      padding: padding(context),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
             Checkbox(
                 value: isActive,
                 onChanged: (value) => setState(() => isActive = value!)),
-            const Text('Sunday', style: style),
+            Text(widget.day, style: style),
             const SizedBox(width: 50),
             IconButton(
-              onPressed: () {
-                if (isActive) {
-                  setState(() {
-                    fromControllers.add(TextEditingController(
-                        text: UtilData.obterHoraHHMM(parsedDateFrom
-                            .add(Duration(hours: openHours.length + 1)))));
-                    toControllers.add(TextEditingController(
-                        text: UtilData.obterHoraHHMM(parsedDateTo)));
-                  });
-
-                  openHours.add(
-                    OpeningHours(
-                      id: '${openHours.length + 1}',
-                      dayId: '1',
-                      from: DateTime.parse(
-                              '2022-03-20 ${fromControllers.first.text}')
-                          .add(const Duration(hours: 1)),
-                      to: DateTime.parse(
-                          '2022-03-21 ${toControllers.first.text}'),
-                    ),
-                  );
-                }
-              },
+              onPressed: widget.addTime,
               icon: const Icon(Icons.add),
             ),
           ],
         ),
-        const SizedBox(height: 30),
-        openHours.isEmpty || !isActive
+        const SizedBox(height: 16),
+        widget.items.isEmpty || !isActive
             ? const Text('Un Available', style: style)
             : ListView.separated(
                 shrinkWrap: true,
-                itemCount: openHours.length,
-                // toControllers.length,
-                // openingHours.where((element) => element.dayId == '1').length,
-                // openingHours.length,
+                itemCount: widget.items.length,
                 separatorBuilder: (context, _) => const SizedBox(height: 10),
-                itemBuilder: (context, index) => FromToFieldWidget(
-                  toController: toControllers[index],
-                  fromController: fromControllers[index],
-                  onDelete: () {
-                    openHours.removeAt(index);
-                    setState(() {});
-                  },
-                ),
+                itemBuilder: (context, index) => FromToOpeningHoursWidget(
+                    onDelete: () {
+                      widget.items.removeAt(index);
+                      setState(() {});
+                    },
+                    openingHours: widget.items[index]),
               ),
+        const SizedBox(height: 40),
+        const Divider(),
       ],
     );
   }

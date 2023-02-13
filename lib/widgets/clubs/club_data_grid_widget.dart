@@ -1,4 +1,5 @@
 import 'package:clients_digcoach/providers/club_provider.dart';
+import 'package:clients_digcoach/providers/coach_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
@@ -15,7 +16,6 @@ class ClubDataGridWidget extends ConsumerStatefulWidget {
 }
 
 class _ClubDataGridWidgetState extends ConsumerState<ClubDataGridWidget> {
-
   final _title = const [
     'Photo',
     'Name',
@@ -24,8 +24,6 @@ class _ClubDataGridWidgetState extends ConsumerState<ClubDataGridWidget> {
     'Number Courts',
     'Actions',
   ];
-
-
 
   @override
   Widget build(BuildContext context) => ref.watch(clubProvider).isLoading
@@ -63,7 +61,6 @@ class ClubsDataSource extends DataGridSource {
         .map<DataGridRow>(
           (dataGridRow) => DataGridRow(
             cells: [
-              // DataGridCell<String>(columnName: 'id', value: dataGridRow.id),
               DataGridCell<List<String>>(
                 columnName: 'Photo',
                 value: dataGridRow.generalInfo.images,
@@ -114,7 +111,8 @@ class ClubsDataSource extends DataGridSource {
                       children: [
                         IconButton(
                           onPressed: () {
-                            final context = (dataGridCell.value['3'] as BuildContext);
+                            final context =
+                                (dataGridCell.value['3'] as BuildContext);
                           },
                           icon: const Icon(Icons.edit, color: kPrimaryColor),
                         ),
@@ -127,10 +125,20 @@ class ClubsDataSource extends DataGridSource {
                         ),
                       ],
                     )
-                  : Text(
-                      dataGridCell.value.toString(),
-                      style: const TextStyle(color: kPrimaryColor),
-                    ),
+                  : dataGridCell.columnName == 'Photo'
+                      ? Column(
+                          children: (dataGridCell.value as List<String>)
+                              .map((e) => Image.network(
+                                    e,
+                                    fit: BoxFit.fill,
+                                    height: 45,
+                                    width: 100,
+                                  ))
+                              .toList())
+                      : Text(
+                          dataGridCell.value.toString(),
+                          style: const TextStyle(color: kPrimaryColor),
+                        ),
             );
           },
         ).toList(),
@@ -140,6 +148,7 @@ class ClubsDataSource extends DataGridSource {
     final id = (dataGridCell.value['0'] as Club).id;
     final clubs = (dataGridCell.value['1'] as List<Club>);
     final ref = (dataGridCell.value['2'] as WidgetRef);
+    if (id == clubs.first.id) return;
     ref.read(clubProvider).removeClubById(id);
   }
 }

@@ -203,12 +203,6 @@ List<Reservation> reservations = [
 ];
 
 class ReservationRepository {
-  // Future<Reservation> getReservation(String id) async {
-  //   return Future.delayed(
-  //     const Duration(seconds: 1),
-  //     () => reservations.firstWhere((reservation) => reservation.id == id),
-  //   );
-  // }
 
   Future<List<Reservation>> getReservations() async => Future.delayed(
         const Duration(seconds: 1),
@@ -221,6 +215,14 @@ class ReservationRepository {
     return Future.delayed(
       const Duration(seconds: 1),
       () => reservations.where((element) => element.clubId == id).toList(),
+    );
+  }
+  Future<List<Reservation>> getReservationsByCoachId({
+    required String coachId,
+  }) async {
+    return Future.delayed(
+      const Duration(seconds: 1),
+      () => reservations.where((element) => element.coachId == coachId).toList(),
     );
   }
 
