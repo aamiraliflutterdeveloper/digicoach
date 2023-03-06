@@ -66,7 +66,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '374714244402',
     projectId: 'client-digcoach',
     storageBucket: 'client-digcoach.appspot.com',
-    iosClientId: '374714244402-dg9lhgtm7pbjn99o7vni0ibr0b3jdoiq.apps.googleusercontent.com',
+    iosClientId:
+        '374714244402-dg9lhgtm7pbjn99o7vni0ibr0b3jdoiq.apps.googleusercontent.com',
     iosBundleId: 'com.example.clientsDigcoach',
   );
 
@@ -76,7 +77,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '374714244402',
     projectId: 'client-digcoach',
     storageBucket: 'client-digcoach.appspot.com',
-    iosClientId: '374714244402-dg9lhgtm7pbjn99o7vni0ibr0b3jdoiq.apps.googleusercontent.com',
+    iosClientId:
+        '374714244402-dg9lhgtm7pbjn99o7vni0ibr0b3jdoiq.apps.googleusercontent.com',
     iosBundleId: 'com.example.clientsDigcoach',
   );
 }

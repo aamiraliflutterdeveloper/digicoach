@@ -1,10 +1,26 @@
-import 'package:clients_digcoach/core/responsive.dart';
+import 'package:clients_digcoach/data/menus.dart';
+import 'package:clients_digcoach/models/end_drawer_popup.dart';
 import 'package:clients_digcoach/providers/club_provider.dart';
 import 'package:clients_digcoach/providers/home_provider.dart';
+import 'package:clients_digcoach/screens/clubs/add_club_screen.dart';
+import 'package:clients_digcoach/screens/clubs/add_manager_screen.dart';
+import 'package:clients_digcoach/screens/clubs/clubs_screen.dart';
+import 'package:clients_digcoach/screens/coaches/add_coach_screen.dart';
+import 'package:clients_digcoach/screens/coaches/coaches_screen.dart';
+import 'package:clients_digcoach/screens/customers_screen.dart';
+import 'package:clients_digcoach/screens/dashboard_screen.dart';
+import 'package:clients_digcoach/screens/evaluations_screen.dart';
+import 'package:clients_digcoach/screens/groups_screen.dart';
+import 'package:clients_digcoach/screens/lessons_screen.dart';
+import 'package:clients_digcoach/screens/messages_screen.dart';
+import 'package:clients_digcoach/screens/other_screen.dart';
+import 'package:clients_digcoach/screens/schedule_screen.dart';
+import 'package:clients_digcoach/utils/responsive.dart';
+import 'package:clients_digcoach/utils/widget_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../core/constants/menus.dart';
+import '../models/menu.dart';
 import '../providers/coach_provider.dart';
 import '../providers/court_provider.dart';
 import '../providers/reservation_provider.dart';
@@ -22,47 +38,90 @@ class _HomePageState extends ConsumerState<HomePage> {
   @override
   void initState() {
     super.initState();
-    _fetchClubs();
-    clubId();
-    _fetchCourts();
-    _fetchCoaches();
-    _fetchReservations();
+
+    _fetchData();
   }
 
-  Future<void> _fetchClubs() async => await ref.read(clubProvider).getClubs();
-
-  Future<void> clubId() async => await ref.read(clubProvider).getClubId();
-
-  Future<void> _fetchCourts() async =>
-      await ref.read(courtProvider).getCourts();
-
-
-  Future<void> _fetchReservations() async =>
-      await ref.read(reservationProvider).getReservations();
-
-  Future<void> _fetchCoaches() async =>
-      await ref.read(coachProvider).getCoaches();
-
-
+  Future<void> _fetchData() async {
+    await ref.read(clubProvider).getClubs();
+    await ref.read(clubProvider).getManagers();
+    await ref.read(clubProvider).getClub();
+    await ref.read(courtProvider).getCourts();
+    await ref.read(coachProvider).getCoaches();
+    await ref.read(reservationProvider).getReservations();
+  }
 
   @override
   Widget build(BuildContext context) {
     final responsive = Responsive();
     responsive.init(context);
     final isDesktop = responsive.isDesktop;
-    return  Scaffold(
-            drawerEnableOpenDragGesture: false,
-            appBar: const AppBarWidget(),
-            drawer: isDesktop ? null : const DrawerWidget(),
-            body: Row(
-              children: [
-                if (isDesktop) const Expanded(child: DrawerWidget()),
-                Expanded(
-                  flex: 5,
-                  child: menus[ref.watch(homeProvider).currentIndex].widget,
-                ),
-              ],
-            ),
-          );
+    final index = ref.watch(homeProvider).currentIndex;
+    final menu = Menus.all[index];
+
+    return Scaffold(
+      drawerEnableOpenDragGesture: false,
+      appBar: const AppBarWidget(),
+      drawer: isDesktop ? null : const DrawerWidget(),
+      endDrawer: buildEndDrawer(),
+      body: Row(
+        children: [
+          if (isDesktop) const Expanded(child: DrawerWidget()),
+          Expanded(flex: 5, child: buildMenu(menu)),
+        ],
+      ),
+    );
+  }
+
+  Widget buildEndDrawer() {
+    final size = MediaQuery.of(context).size;
+
+    return Material(
+      child: SizedBox(
+        height: size.height,
+        width: size.width >= 800 ? size.width * .5 : size.width,
+        child: endDrawerScreen,
+      ),
+    );
+  }
+
+  Widget get endDrawerScreen {
+    final endDrawerPopup = ref.watch(homeProvider).endDrawerPopup;
+
+    switch (endDrawerPopup) {
+      case EndDrawerPopup.addClub:
+        return const AddClubScreen();
+      case EndDrawerPopup.addManager:
+        return const AddManagerScreen();
+      case EndDrawerPopup.addCoach:
+      default:
+        return const AddCoachScreen();
+    }
+  }
+
+  Widget buildMenu(Menu menu) {
+    switch (menu) {
+      case Menus.dashboard:
+        return const DashboardScreen();
+      case Menus.clubs:
+        return const ClubsScreen();
+      case Menus.coaches:
+        return const CoachesScreen();
+      case Menus.customers:
+        return const CustomersScreen();
+      case Menus.groups:
+        return const GroupsScreen();
+      case Menus.schedule:
+        return const ScheduleScreen();
+      case Menus.lessons:
+        return const LessonsScreen();
+      case Menus.evaluations:
+        return const EvaluationsScreen();
+      case Menus.messages:
+        return const MessagesScreen();
+      case Menus.other:
+      default:
+        return const OtherScreen();
+    }
   }
 }

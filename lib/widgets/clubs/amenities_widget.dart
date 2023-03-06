@@ -1,9 +1,10 @@
-import 'package:clients_digcoach/core/constants/colors.dart';
-import 'package:clients_digcoach/repositories/club_repository.dart';
+import 'package:clients_digcoach/data/amenities.dart';
+import 'package:clients_digcoach/data/colors.dart';
+import 'package:clients_digcoach/models/club/amenity.dart';
+import 'package:clients_digcoach/providers/add_club_provider.dart';
+import 'package:clients_digcoach/providers/club_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../../core/constants/functions.dart';
 
 class AmenitiesWidget extends ConsumerStatefulWidget {
   const AmenitiesWidget({super.key});
@@ -14,95 +15,60 @@ class AmenitiesWidget extends ConsumerStatefulWidget {
 }
 
 class _AmenitiesWidgetState extends ConsumerState<AmenitiesWidget> {
-  List<String> selectedReportList = [];
-
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Padding(
-        padding:padding(context),
-        child: MultiSelectChip(
-          listItems: clubs[0].amenities,
-          onSelectionChanged: (selectedList) =>
-              setState(() => selectedReportList = selectedList),
-          maxSelection: clubs[0].amenities.length,
-          itemSelected: const [
-            'freeParking',
-            'ballsRenting',
-            'changeRoom',
-            'coffeeShop',
-            'snackBar',
+      child: Column(
+        children: [
+          Wrap(children: allAmenities.map(buildAmenity).toList()),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              ElevatedButton(
+                child: const Text('Submit'),
+                onPressed: () async {
+                  final club = ref.read(addClubProvider).club;
+                  ref.read(clubProvider).addClub(club);
+
+                  Scaffold.of(context).closeEndDrawer();
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget buildAmenity(Amenity amenity) {
+    final amenities = ref.watch(addClubProvider).club.amenities;
+    final isSelected = amenities.contains(amenity);
+    final color = isSelected ? AppColors.primaryColor : Colors.grey;
+
+    return GestureDetector(
+      onTap: () => ref.read(addClubProvider).toggleAmenity(amenity),
+      child: Container(
+        width: 150,
+        margin: const EdgeInsets.all(8),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: color),
+        ),
+        child: Column(
+          children: [
+            Icon(amenity.icon, color: color),
+            const SizedBox(height: 8),
+            Text(
+              amenity.text,
+              style: TextStyle(
+                color: color,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              ),
+            ),
           ],
         ),
       ),
     );
-  }
-}
-
-
-class MultiSelectChip extends StatefulWidget {
-  const MultiSelectChip({
-    super.key,
-    required this.listItems,
-    this.itemSelected,
-    this.onSelectionChanged,
-    this.onMaxSelected,
-    this.maxSelection,
-  });
-
-  final List<String> listItems;
-  final List<String>? itemSelected;
-  final Function(List<String>)? onSelectionChanged;
-  final Function(List<String>)? onMaxSelected;
-  final int? maxSelection;
-
-  @override
-  State<MultiSelectChip> createState() => _MultiSelectChipState();
-}
-
-class _MultiSelectChipState extends State<MultiSelectChip> {
-  List<String> itemSelected = [];
-
-  @override
-  void initState() {
-    itemSelected = widget.itemSelected ?? [];
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Wrap(
-      children: _buildChoiceList(),
-    );
-  }
-
-  _buildChoiceList() {
-    List<Widget> choices = [];
-
-    for (var item in widget.listItems) {
-      choices.add(Container(
-        padding: const EdgeInsets.all(5.0),
-        child: ChoiceChip(
-          label: Text(item),
-          selected: itemSelected.contains(item),
-          selectedColor: kSecondaryColor,
-          onSelected: (selected) {
-            if (itemSelected.length == (widget.maxSelection ?? -1) &&
-                !itemSelected.contains(item)) {
-              widget.onMaxSelected?.call(itemSelected);
-            } else {
-              setState(() {
-                itemSelected.contains(item)
-                    ? itemSelected.remove(item)
-                    : itemSelected.add(item);
-                widget.onSelectionChanged?.call(itemSelected);
-              });
-            }
-          },
-        ),
-      ));
-    }
-
-    return choices;
   }
 }

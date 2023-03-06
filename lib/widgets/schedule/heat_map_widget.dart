@@ -1,13 +1,10 @@
-import 'package:clients_digcoach/providers/club_provider.dart';
+import 'package:clients_digcoach/data/colors.dart';
 import 'package:clients_digcoach/providers/coach_provider.dart';
 import 'package:clients_digcoach/providers/court_provider.dart';
 import 'package:clients_digcoach/providers/reservation_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
-
-import '../../core/constants/colors.dart';
-import '../../providers/schedule_provider.dart';
 
 class HeatMapWidget extends ConsumerStatefulWidget {
   const HeatMapWidget({super.key, required this.isCoachView});
@@ -74,11 +71,11 @@ class _HeatMapWidgetState extends ConsumerState<HeatMapWidget> {
                           decoration: const BoxDecoration(
                             gradient: LinearGradient(
                               colors: <Color>[
-                                kLightGrey,
-                                kLightGreen,
-                                kMidGreen,
-                                kDarkGreen,
-                                kDarkerGreen,
+                                AppColors.lightGrey,
+                                AppColors.lightGreen,
+                                AppColors.midGreen,
+                                AppColors.darkGreen,
+                                AppColors.darkerGreen,
                               ],
                             ),
                           ),
@@ -115,19 +112,18 @@ class _HeatMapWidgetState extends ConsumerState<HeatMapWidget> {
   /// Returns the cell background color based on the date
   Color _getMonthCellBackgroundColor(DateTime date) {
     int reservation =
-        widget.isCoachView ? _coachReservation(date) :
-        _courtReservation(date);
+        widget.isCoachView ? _coachReservation(date) : _courtReservation(date);
 
     if (reservation == 0) {
-      return kLightGrey;
+      return AppColors.lightGrey;
     } else if (reservation > 0 && reservation <= 2) {
-      return kLightGreen;
+      return AppColors.lightGreen;
     } else if (reservation > 2 && reservation <= 4) {
-      return kMidGreen;
+      return AppColors.midGreen;
     } else if (reservation > 4 && reservation <= 6) {
-      return kDarkGreen;
+      return AppColors.darkGreen;
     } else {
-      return kDarkerGreen;
+      return AppColors.darkerGreen;
     }
   }
 

@@ -1,4 +1,6 @@
+import 'package:clients_digcoach/providers/add_club_provider.dart';
 import 'package:clients_digcoach/providers/club_provider.dart';
+import 'package:clients_digcoach/utils/widget_utils.dart';
 import 'package:clients_digcoach/widgets/clubs/amenities_widget.dart';
 import 'package:clients_digcoach/widgets/clubs/courts_widget.dart';
 import 'package:clients_digcoach/widgets/clubs/general_info_widget.dart';
@@ -8,8 +10,6 @@ import 'package:clients_digcoach/widgets/tab_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../providers/opening_hours_provider.dart';
-
 class AddClubScreen extends ConsumerStatefulWidget {
   const AddClubScreen({super.key});
 
@@ -18,10 +18,9 @@ class AddClubScreen extends ConsumerStatefulWidget {
 }
 
 class _AddClubScreenState extends ConsumerState<AddClubScreen> {
-
   @override
   Widget build(BuildContext context) {
-    const titles = [
+    const tabs = [
       'General Info',
       'Opening Hours',
       'Holidays',
@@ -35,31 +34,34 @@ class _AddClubScreenState extends ConsumerState<AddClubScreen> {
       CourtsWidget(),
       AmenitiesWidget(),
     ];
-    return SafeArea(
-      child: Scaffold(
-        body: Column(
-          children: [
-            const SizedBox(height: 40),
-            Row(
-              children: [
-                ...List.generate(
-                  titles.length,
-                  (index) => Expanded(
-                    child: TabWidget(
-                      index: index,
-                      title: titles[index],
-                      currentIndex:ref.watch(clubProvider).addClubCurrentTap ,
-                      onTap: () => ref.read(clubProvider).addClubCurrentTap  = index,
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            Expanded(flex: 6, child: widgets[ref.watch(clubProvider).addClubCurrentTap]),
-          ],
-        ),
+    return Scaffold(
+      body: ListView(
+        padding: WidgetUtils.padding(context, maxPadding: 16),
+        children: [
+          buildTabs(tabs),
+          const SizedBox(height: 24),
+          widgets[ref.watch(addClubProvider).tabIndex],
+        ],
       ),
     );
   }
+
+  Widget buildTabs(List<String> tabs) => Row(
+        children: WidgetUtils.addSpaceBetween(
+          children: List.generate(
+            tabs.length,
+            (index) => Expanded(
+              child: TabWidget(
+                height: 25,
+                index: index,
+                title: tabs[index],
+                currentIndex: ref.watch(addClubProvider).tabIndex,
+                onTap: () => ref.read(addClubProvider).tabIndex = index,
+                borderRadius: BorderRadius.circular(30),
+              ),
+            ),
+          ),
+          space: const SizedBox(width: 5),
+        ),
+      );
 }

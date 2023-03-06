@@ -1,10 +1,8 @@
-// A model class for tennis coach
-
 class Coach {
   final String id;
   final List<String> clubsId;
   final String name;
-  final String surName;
+  final String surname;
   final String phone;
   final String? secondSurName;
   final String? street;
@@ -21,7 +19,7 @@ class Coach {
     required this.id,
     required this.clubsId,
     required this.name,
-    required this.surName,
+    required this.surname,
     required this.phone,
     this.image,
     this.description,
@@ -48,7 +46,7 @@ class Coach {
         phone: json['phone'],
         image: json['image'],
         description: json['description'],
-        surName: json['surName'],
+        surname: json['surName'],
         secondSurName: json['secondSurName'],
         birthDate: json['birthDate'],
         active: json['active'],
@@ -66,7 +64,7 @@ class Coach {
         'phone': phone,
         'image': image,
         'description': description,
-        'surName': surName,
+        'surName': surname,
         'secondSurName': secondSurName,
         'birthDate': birthDate,
         'active': active,

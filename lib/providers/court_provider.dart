@@ -14,7 +14,6 @@ class CourtProvider extends ChangeNotifier {
   List<Court> _courtsByClubId = [];
   List<Court> _courts = [];
 
-
   /// getters
 
   int? get selectedCourtNumber => _selectedCourtNumber;
@@ -37,7 +36,6 @@ class CourtProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-
   /// methods
   Future<List<Court>> getCourts() async {
     _courts = await courtRepository.getCourts();
@@ -51,9 +49,9 @@ class CourtProvider extends ChangeNotifier {
     return _courtsByClubId;
   }
 
-Future<int?> getCourtNumber(String clubId) async {
-  selectedCourtNumber = (await courtRepository.getCourtNumber(clubId));
-  notifyListeners();
-  return selectedCourtNumber;
-}
+  Future<int?> getCourtNumber(String clubId) async {
+    selectedCourtNumber = (await courtRepository.getCourtNumber(clubId));
+    notifyListeners();
+    return selectedCourtNumber;
+  }
 }

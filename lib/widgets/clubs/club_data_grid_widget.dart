@@ -1,11 +1,11 @@
+import 'package:clients_digcoach/providers/add_club_provider.dart';
 import 'package:clients_digcoach/providers/club_provider.dart';
-import 'package:clients_digcoach/providers/coach_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
-import '../../core/constants/colors.dart';
-import '../../models/club.dart';
+import '../../data/colors.dart';
+import '../../models/club/club.dart';
 
 class ClubDataGridWidget extends ConsumerStatefulWidget {
   const ClubDataGridWidget({super.key});
@@ -16,7 +16,7 @@ class ClubDataGridWidget extends ConsumerStatefulWidget {
 }
 
 class _ClubDataGridWidgetState extends ConsumerState<ClubDataGridWidget> {
-  final _title = const [
+  final _titles = const [
     'Photo',
     'Name',
     'City',
@@ -32,9 +32,10 @@ class _ClubDataGridWidgetState extends ConsumerState<ClubDataGridWidget> {
           defaultColumnWidth: 200,
           source: ClubsDataSource(context: context, ref: ref),
           columns: List.generate(
-            _title.length,
+            _titles.length,
             (index) {
-              final title = _title[index];
+              final title = _titles[index];
+
               return GridColumn(
                 columnName: title,
                 label: Container(
@@ -43,9 +44,10 @@ class _ClubDataGridWidgetState extends ConsumerState<ClubDataGridWidget> {
                   child: Text(
                     title,
                     style: const TextStyle(
-                        color: kPrimaryColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16),
+                      color: AppColors.primaryColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
                   ),
                 ),
               );
@@ -55,37 +57,41 @@ class _ClubDataGridWidgetState extends ConsumerState<ClubDataGridWidget> {
 }
 
 class ClubsDataSource extends DataGridSource {
-  ClubsDataSource({required BuildContext context, required WidgetRef ref}) {
+  ClubsDataSource({
+    required BuildContext context,
+    required WidgetRef ref,
+  }) {
     final clubs = ref.watch(clubProvider).clubs;
+
     dataGridRows = clubs
         .map<DataGridRow>(
-          (dataGridRow) => DataGridRow(
+          (club) => DataGridRow(
             cells: [
-              DataGridCell<List<String>>(
+              const DataGridCell<List<String>>(
                 columnName: 'Photo',
-                value: dataGridRow.generalInfo.images,
+                value: [],
               ),
               DataGridCell<String>(
                 columnName: 'Name',
-                value: dataGridRow.generalInfo.name,
+                value: club.generalInfo.name,
               ),
               DataGridCell<String>(
                 columnName: 'City',
-                value: dataGridRow.generalInfo.city,
+                value: club.generalInfo.city,
               ),
               DataGridCell<String>(
                 columnName: 'Phone',
-                value: dataGridRow.generalInfo.phone,
+                value: club.generalInfo.phone,
               ),
               DataGridCell<int>(
                 columnName: 'Number Courts',
-                value: dataGridRow.courts
-                    .where((element) => element.clubId == dataGridRow.id)
+                value: club.courts
+                    .where((element) => element.clubId == club.id)
                     .length,
               ),
               DataGridCell(
                 columnName: 'Actions',
-                value: {'0': dataGridRow, '1': clubs, '2': ref, '3': context},
+                value: {'0': club, '1': ref, '2': context},
               ),
             ],
           ),
@@ -99,56 +105,68 @@ class ClubsDataSource extends DataGridSource {
   List<DataGridRow> get rows => dataGridRows;
 
   @override
-  DataGridRowAdapter? buildRow(DataGridRow row) => DataGridRowAdapter(
-        cells: row.getCells().map<Widget>(
-          (dataGridCell) {
-            return Container(
-              alignment: Alignment.center,
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: dataGridCell.columnName == 'Actions'
-                  ? Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        IconButton(
-                          onPressed: () {
-                            final context =
-                                (dataGridCell.value['3'] as BuildContext);
-                          },
-                          icon: const Icon(Icons.edit, color: kPrimaryColor),
-                        ),
-                        IconButton(
-                          onPressed: () => _removeClub(dataGridCell),
-                          icon: const Icon(
-                            Icons.delete,
-                            color: Colors.red,
-                          ),
-                        ),
-                      ],
-                    )
-                  : dataGridCell.columnName == 'Photo'
-                      ? Column(
-                          children: (dataGridCell.value as List<String>)
-                              .map((e) => Image.network(
-                                    e,
-                                    fit: BoxFit.fill,
-                                    height: 45,
-                                    width: 100,
-                                  ))
-                              .toList())
-                      : Text(
-                          dataGridCell.value.toString(),
-                          style: const TextStyle(color: kPrimaryColor),
-                        ),
-            );
-          },
-        ).toList(),
-      );
+  DataGridRowAdapter? buildRow(DataGridRow row) {
+    final cells = row.getCells();
 
-  void _removeClub(DataGridCell<dynamic> dataGridCell) {
-    final id = (dataGridCell.value['0'] as Club).id;
-    final clubs = (dataGridCell.value['1'] as List<Club>);
-    final ref = (dataGridCell.value['2'] as WidgetRef);
-    if (id == clubs.first.id) return;
+    return DataGridRowAdapter(
+      cells: cells
+          .map<Widget>((cell) => Container(
+                alignment: Alignment.center,
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: buildCells(cell),
+              ))
+          .toList(),
+    );
+  }
+
+  void _editClub(DataGridCell<dynamic> cell) {
+    final club = cell.value['0'] as Club;
+    final ref = (cell.value['1'] as WidgetRef);
+    final context = (cell.value['2'] as BuildContext);
+
+    ref.read(addClubProvider).club = club;
+
+    Scaffold.of(context).openEndDrawer();
+  }
+
+  void _removeClub(DataGridCell<dynamic> cell) {
+    final id = (cell.value['0'] as Club).id;
+    final ref = (cell.value['1'] as WidgetRef);
+
     ref.read(clubProvider).removeClubById(id);
+  }
+
+  Widget buildCells(DataGridCell<dynamic> cell) {
+    if (cell.columnName == 'Actions') {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          IconButton(
+            onPressed: () => _editClub(cell),
+            icon: const Icon(Icons.edit, color: AppColors.primaryColor),
+          ),
+          IconButton(
+            onPressed: () => _removeClub(cell),
+            icon: const Icon(Icons.delete, color: Colors.red),
+          ),
+        ],
+      );
+    } else if (cell.columnName == 'Photo') {
+      final urls = cell.value as List<String>;
+      return Column(
+          children: urls
+              .map((url) => Image.network(
+                    url,
+                    fit: BoxFit.fill,
+                    height: 45,
+                    width: 100,
+                  ))
+              .toList());
+    } else {
+      return Text(
+        cell.value.toString(),
+        style: const TextStyle(color: AppColors.primaryColor),
+      );
+    }
   }
 }

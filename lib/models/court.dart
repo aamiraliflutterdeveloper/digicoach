@@ -1,4 +1,3 @@
-// A model class for tennis court
 class Court {
   final String id;
   final String clubId;
@@ -41,4 +40,31 @@ class Court {
         'description': description,
         'courtNumber': courtNumber,
       };
+
+  Court copy({
+    final String? id,
+    final String? clubId,
+    final String? name,
+    final String? description,
+    final int? courtNumber,
+    final int? sport,
+    final int? type,
+    final int? closure,
+    final int? numberPlayers,
+    final bool? active,
+    final bool? outsideCourtEnable,
+  }) =>
+      Court(
+        id: id ?? this.id,
+        clubId: clubId ?? this.clubId,
+        name: name ?? this.name,
+        description: description ?? this.description,
+        courtNumber: courtNumber ?? this.courtNumber,
+        sport: sport ?? this.sport,
+        type: type ?? this.type,
+        closure: closure ?? this.closure,
+        numberPlayers: numberPlayers ?? this.numberPlayers,
+        active: active ?? this.active,
+        outsideCourtEnable: outsideCourtEnable ?? this.outsideCourtEnable,
+      );
 }

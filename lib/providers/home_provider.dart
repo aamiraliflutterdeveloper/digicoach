@@ -1,3 +1,4 @@
+import 'package:clients_digcoach/models/end_drawer_popup.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -10,6 +11,13 @@ class HomeProvider extends ChangeNotifier {
 
   set currentIndex(int index) {
     _currentIndex = index;
+    notifyListeners();
+  }
+
+  EndDrawerPopup _endDrawerPopup = EndDrawerPopup.addManager;
+  EndDrawerPopup get endDrawerPopup => _endDrawerPopup;
+  set endDrawerPopup(EndDrawerPopup endDrawerPopup) {
+    _endDrawerPopup = endDrawerPopup;
     notifyListeners();
   }
 }

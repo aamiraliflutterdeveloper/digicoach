@@ -1,9 +1,9 @@
+import 'package:clients_digcoach/data/colors.dart';
+import 'package:clients_digcoach/data/menus.dart';
 import 'package:clients_digcoach/providers/club_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/constants/colors.dart';
-import '../../core/constants/menus.dart';
 import '../../models/menu.dart';
 import '../../providers/coach_provider.dart';
 import '../../providers/court_provider.dart';
@@ -20,27 +20,32 @@ class DrawerWidget extends ConsumerStatefulWidget {
 
 class _DrawerWidgetState extends ConsumerState<DrawerWidget> {
   @override
-  Widget build(BuildContext context) => Drawer(
-        elevation: 0,
-        child: ReorderableListView(
-          onReorder: _onReorder,
-          children: List.generate(
-            menus.length,
-            (index) {
-              final menu = menus[index];
-              return HomeMenuItemWidget(
-                key: ValueKey(menu),
-                title: menu.title,
-                icon: menu.icon,
-                onTap: () => _onTap(index),
-                itemColor: ref.watch(homeProvider).currentIndex == index
-                    ? kSecondaryColor
-                    : kPrimaryColor,
-              );
-            },
-          ),
+  Widget build(BuildContext context) {
+    final menus = Menus.all;
+
+    return Drawer(
+      elevation: 0,
+      child: ReorderableListView(
+        onReorder: _onReorder,
+        children: List.generate(
+          menus.length,
+          (index) {
+            final menu = menus[index];
+
+            return HomeMenuItemWidget(
+              key: ValueKey(menu),
+              title: menu.title,
+              icon: menu.icon,
+              onTap: () => _onTap(index),
+              itemColor: ref.watch(homeProvider).currentIndex == index
+                  ? AppColors.secondaryColor
+                  : AppColors.primaryColor,
+            );
+          },
         ),
-      );
+      ),
+    );
+  }
 
   void _onTap(int index) {
     ref.read(homeProvider).currentIndex = index;
@@ -56,7 +61,7 @@ class _DrawerWidgetState extends ConsumerState<DrawerWidget> {
           .getReservationsByCourtNumber(courtNumber ?? 1);
       ref.read(coachProvider).getCoachId(clubId);
       ref.read(coachProvider).getCoachesByClubId(clubId);
-      ref.read(reservationProvider).getReservationsByCoachId(coachId: coachId! );
+      ref.read(reservationProvider).getReservationsByCoachId(coachId: coachId!);
     }
     // if (!mounted) return;
     Scaffold.of(context).closeDrawer();
@@ -65,7 +70,8 @@ class _DrawerWidgetState extends ConsumerState<DrawerWidget> {
   void _onReorder(int oldIndex, int newIndex) => setState(() {
         final index = newIndex > oldIndex ? newIndex - 1 : newIndex;
         ref.watch(homeProvider).currentIndex = index;
-        Menu menu = menus.removeAt(oldIndex);
-        menus.insert(index, menu);
+
+        final menu = Menus.all.removeAt(oldIndex);
+        Menus.all.insert(index, menu);
       });
 }

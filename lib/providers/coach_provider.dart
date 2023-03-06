@@ -7,27 +7,25 @@ import '../models/coach.dart';
 final coachProvider = ChangeNotifierProvider((ref) => CoachProvider());
 
 class CoachProvider extends ChangeNotifier {
-  final CoachRepository _coachRepository = CoachRepository();
+  final _coachRepository = CoachRepository();
 
   int _coachesViewIndex = 0;
-  int _coachManagerCurrentIndex = 0;
+  int get coachesViewIndex => _coachesViewIndex;
+
+  int _tabIndex = 0;
+  int get tabIndex => _tabIndex;
+
   String? _selectedCoachId;
-
-  List<Coach> _coaches = [];
-  List<Coach> _coachesByClubId = [];
-
-  bool _isLoading = false;
-
-  /// getters
-  List<Coach> get coaches => _coaches;
-
-  List<Coach> get coachesByClubId => _coachesByClubId;
-
   String? get selectedCoachId => _selectedCoachId;
 
+  List<Coach> _coaches = [];
+  List<Coach> get coaches => _coaches;
+
+  List<Coach> _coachesByClubId = [];
+  List<Coach> get coachesByClubId => _coachesByClubId;
+
+  bool _isLoading = false;
   bool get isLoading => _isLoading;
-  int get coachesViewIndex => _coachesViewIndex;
-  int get coachManagerCurrentIndex => _coachManagerCurrentIndex;
 
   /// setters
   void _loading(bool isLoading) {
@@ -45,12 +43,20 @@ class CoachProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  set coachManagerCurrentIndex(int value) {
-    _coachManagerCurrentIndex = value;
+  set tabIndex(int value) {
+    _tabIndex = value;
     notifyListeners();
   }
 
-  /// methods
+  Future<void> removeCoachById(String id) async {
+    if (id == coaches.first.id) return;
+
+    _loading(true);
+    _coaches = List.of(_coaches)..removeWhere((coach) => coach.id == id);
+    await _coachRepository.removeCoachById(id);
+    _loading(false);
+    notifyListeners();
+  }
 
   Future<String?> getCoachId(String id) async {
     selectedCoachId = await _coachRepository.getCoachId(id);

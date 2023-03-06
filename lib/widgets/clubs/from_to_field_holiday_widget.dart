@@ -1,60 +1,57 @@
-import 'dart:math';
-
+import 'package:clients_digcoach/utils/utils.dart';
+import 'package:clients_digcoach/widgets/bordered_field_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 
-import '../../core/utils.dart';
-import '../../models/holiday.dart';
-import '../text_form_field_widget.dart';
+import '../../models/club/holiday.dart';
 
 class FromToHolidaysWidget extends StatefulWidget {
   const FromToHolidaysWidget({
     super.key,
     required this.holiday,
-    this.onDelete,
+    required this.onDelete,
   });
 
   final Holiday holiday;
-  final VoidCallback? onDelete;
+  final VoidCallback onDelete;
 
   @override
   State<FromToHolidaysWidget> createState() => _FromToHolidaysWidgetState();
 }
 
 class _FromToHolidaysWidgetState extends State<FromToHolidaysWidget> {
-  TextEditingController holidayFrom = TextEditingController();
-  TextEditingController holidayTo = TextEditingController();
+  late DateTime start;
+  late DateTime end;
 
   @override
   void initState() {
     super.initState();
-    holidayFrom.text = Utils.toDateYYMMDD(widget.holiday.holidaysFrom);
-    holidayTo.text = Utils.toDateYYMMDD(widget.holiday.holidaysTo);
+
+    start = widget.holiday.from;
+    end = widget.holiday.to;
   }
 
   @override
   Widget build(BuildContext context) {
-    const style = TextStyle(
-      fontSize: 16,
-      fontWeight: FontWeight.bold,
-    );
+    const style = TextStyle(fontSize: 16, fontWeight: FontWeight.bold);
+
     return Row(
-      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text('From', style: style),
             const SizedBox(height: 10),
-            SizedBox(
-              width: 200,
-              child: TextFormFieldWidget(
-                controller: holidayFrom,
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                  DateTextFormatter(),
-                ],
-              ),
+            BorderedFieldWidget(
+              text: Utils.toDateYYMMDD(start),
+              onTap: showDateRangePickerDialog,
+            ),
+            const SizedBox(height: 10),
+            BorderedFieldWidget(
+              text: Utils.toTimeHm(start),
+              onTap: showStartTimePickerDialog,
             ),
           ],
         ),
@@ -64,54 +61,110 @@ class _FromToHolidaysWidgetState extends State<FromToHolidaysWidget> {
           children: [
             const Text('To', style: style),
             const SizedBox(height: 10),
-            SizedBox(
-              width: 200,
-              child: TextFormFieldWidget(
-                controller: holidayTo,
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                  DateTextFormatter(),
-                ],
-              ),
+            BorderedFieldWidget(
+              text: Utils.toDateYYMMDD(end),
+              onTap: () => showDateRangePickerDialog(isStart: false),
+            ),
+            const SizedBox(height: 10),
+            BorderedFieldWidget(
+              text: Utils.toTimeHm(end),
+              onTap: showEndTimePickerDialog,
             ),
           ],
         ),
-        IconButton(
-          onPressed: widget.onDelete,
-          icon: const Icon(
-            Icons.delete,
-            color: Colors.red,
+        const SizedBox(width: 12),
+        Container(
+          margin: const EdgeInsets.only(top: 24),
+          child: IconButton(
+            onPressed: widget.onDelete,
+            icon: const Icon(Icons.delete, color: Colors.red),
           ),
         ),
       ],
     );
   }
-}
 
-class DateTextFormatter extends TextInputFormatter {
-  static const _maxChars = 8;
+  void showDateRangePickerDialog({bool isStart = true}) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Center(
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 400, maxHeight: 300),
+            child: SfDateRangePicker(
+              backgroundColor: Colors.white,
+              selectionMode: DateRangePickerSelectionMode.extendableRange,
+              onSelectionChanged: (args) {
+                if (args.value is PickerDateRange) {
+                  final newStart = args.value.startDate;
+                  final newEnd = args.value.endDate;
 
-  @override
-  TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue, TextEditingValue newValue) {
-    var text = _format(newValue.text, '-');
-    return newValue.copyWith(text: text, selection: updateCursorPosition(text));
+                  setState(() {
+                    start = DateTime(
+                      newStart.year,
+                      newStart.month,
+                      newStart.day,
+                      start.hour,
+                      start.minute,
+                    );
+                    end = DateTime(
+                      newEnd.year,
+                      newEnd.month,
+                      newEnd.day,
+                      end.hour,
+                      end.minute,
+                    );
+                  });
+                }
+              },
+              monthViewSettings: const DateRangePickerMonthViewSettings(
+                enableSwipeSelection: false,
+              ),
+              extendableRangeSelectionDirection: isStart
+                  ? ExtendableRangeSelectionDirection.backward
+                  : ExtendableRangeSelectionDirection.forward,
+              initialDisplayDate: widget.holiday.from,
+              initialSelectedRange: PickerDateRange(start, end),
+            ),
+          ),
+        );
+      },
+    );
   }
 
-  String _format(String value, String seperator) {
-    value = value.replaceAll(seperator, '');
-    var newString = '';
+  Future<void> showStartTimePickerDialog() async {
+    final time = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(hour: start.hour, minute: start.minute),
+    );
+    if (time == null) return;
 
-    for (int i = 0; i < min(value.length, _maxChars); i++) {
-      newString += value[i];
-      if ((i == 3 || i == 5) && i != value.length - 1) {
-        newString += seperator;
-      }
-    }
-
-    return newString;
+    setState(() {
+      start = DateTime(
+        start.year,
+        start.month,
+        start.day,
+        time.hour,
+        time.minute,
+      );
+    });
   }
 
-  TextSelection updateCursorPosition(String text) =>
-      TextSelection.fromPosition(TextPosition(offset: text.length));
+  Future<void> showEndTimePickerDialog() async {
+    final time = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(hour: end.hour, minute: end.minute),
+    );
+    if (time == null) return;
+
+    setState(() {
+      end = DateTime(
+        end.year,
+        end.month,
+        end.day,
+        time.hour,
+        time.minute,
+      );
+    });
+  }
 }

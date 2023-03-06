@@ -23,6 +23,7 @@ dependencies:
   intl_phone_number_input: ^0.7.2
   file_picker: ^5.2.5
   email_validator: ^2.1.17
+  syncfusion_flutter_datepicker: ^20.4.52
 
 dev_dependencies:
   flutter_test:

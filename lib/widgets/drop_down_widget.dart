@@ -1,6 +1,5 @@
+import 'package:clients_digcoach/data/colors.dart';
 import 'package:flutter/material.dart';
-
-import '../core/constants/colors.dart';
 
 class DropDownWidget<T> extends StatelessWidget {
   const DropDownWidget({
@@ -42,7 +41,7 @@ class DropDownWidget<T> extends StatelessWidget {
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
-                    color: kPrimaryColor,
+                    color: AppColors.primaryColor,
                   ),
                 ),
               ),
