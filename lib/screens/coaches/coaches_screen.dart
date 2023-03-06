@@ -1,13 +1,11 @@
-
+import 'package:clients_digcoach/data/colors.dart';
 import 'package:clients_digcoach/providers/coach_provider.dart';
+import 'package:clients_digcoach/widgets/coaches/coach_card_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/constants/colors.dart';
 import '../../providers/club_provider.dart';
-import '../../widgets/club_coach_card_widget.dart';
 import '../../widgets/convex_tab_widget.dart';
-import '../clubs/clubs_screen.dart';
 
 class CoachesScreen extends ConsumerStatefulWidget {
   const CoachesScreen({
@@ -21,8 +19,9 @@ class CoachesScreen extends ConsumerStatefulWidget {
 class _CoachesScreenState extends ConsumerState<CoachesScreen> {
   @override
   Widget build(BuildContext context) {
-    const titles = ['Coaches', 'Managers'];
-    const widgets = [ClubCoachCardWidget(isCoach: true), ManagersCardWidget()];
+    const titles = ['Coaches'];
+    const widgets = [CoachesCardWidget()];
+
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
@@ -32,33 +31,30 @@ class _CoachesScreenState extends ConsumerState<CoachesScreen> {
             'Coaches information and permissions',
             style: TextStyle(
               fontSize: 25,
-              color: kPrimaryColor,
+              color: AppColors.primaryColor,
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 32),
-          Padding(
-            padding: const EdgeInsets.only(left: 4),
-            child: Row(
-              children: List.generate(
-                titles.length,
-                    (index) => ConvexTabWidget(
-                  index: index,
-                  titles: titles,
-                  currentIndex: ref.watch(coachProvider).coachManagerCurrentIndex,
-                  onTap: () =>
-                  ref.read(coachProvider).coachManagerCurrentIndex = index,
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            child: widgets[ref.watch(clubProvider).coachManagerCurrentIndex],
-          ),
+          buildTabs(titles),
+          Expanded(child: widgets[ref.watch(coachProvider).tabIndex]),
         ],
       ),
     );
   }
+
+  Widget buildTabs(List<String> titles) => Padding(
+        padding: const EdgeInsets.only(left: 4),
+        child: Row(
+          children: List.generate(
+            titles.length,
+            (index) => ConvexTabWidget(
+              index: index,
+              titles: titles,
+              currentIndex: ref.watch(coachProvider).tabIndex,
+              onTap: () => ref.read(coachProvider).tabIndex = index,
+            ),
+          ),
+        ),
+      );
 }
-
-

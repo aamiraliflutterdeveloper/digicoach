@@ -16,8 +16,8 @@ class HomeMenuItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SizedBox(
-    height: 68.75,
-    child: ListTile(
+        height: 68.75,
+        child: ListTile(
           onTap: onTap,
           contentPadding: const EdgeInsets.only(top: 16, left: 16),
           tileColor: itemColor,
@@ -30,10 +30,10 @@ class HomeMenuItemWidget extends StatelessWidget {
             title,
             style: const TextStyle(
               fontSize: 20,
-              color:  Colors.white,
+              color: Colors.white,
               fontWeight: FontWeight.bold,
             ),
           ),
         ),
-  );
+      );
 }

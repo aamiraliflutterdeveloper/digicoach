@@ -62,7 +62,6 @@ class ReservationProvider extends ChangeNotifier {
     return _reservationsByClubId;
   }
 
-
   Future<List<Reservation>> getReservationsByCoachId({
     required String coachId,
   }) async {

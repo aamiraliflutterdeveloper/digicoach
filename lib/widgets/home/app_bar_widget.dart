@@ -1,12 +1,11 @@
+import 'package:clients_digcoach/data/colors.dart';
 import 'package:clients_digcoach/providers/club_provider.dart';
 import 'package:clients_digcoach/providers/court_provider.dart';
 import 'package:clients_digcoach/providers/reservation_provider.dart';
+import 'package:clients_digcoach/utils/responsive.dart';
 import 'package:clients_digcoach/widgets/progress_bar_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../../core/constants/colors.dart';
-import '../../core/responsive.dart';
 import '../../providers/coach_provider.dart';
 import '../drop_down_widget.dart';
 
@@ -24,12 +23,11 @@ class AppBarWidget extends ConsumerStatefulWidget
 class _AppBarWidgetState extends ConsumerState<AppBarWidget> {
   String currentLanguageValue = '0';
 
-  Future<void> clubId() async => await ref.read(clubProvider).getClubId();
-
   @override
   void initState() {
-    clubId();
     super.initState();
+
+    ref.read(clubProvider).getClub();
   }
 
   @override
@@ -37,6 +35,7 @@ class _AppBarWidgetState extends ConsumerState<AppBarWidget> {
     final responsive = Responsive();
     responsive.init(context);
     final isDesktop = responsive.isDesktop;
+
     return AppBar(
       elevation: 0,
       titleSpacing: 0,
@@ -48,7 +47,7 @@ class _AppBarWidgetState extends ConsumerState<AppBarWidget> {
           ? null
           : IconButton(
               onPressed: () => Scaffold.of(context).openDrawer(),
-              icon: const Icon(Icons.menu, color: kPrimaryColor),
+              icon: const Icon(Icons.menu, color: AppColors.primaryColor),
             ),
       title: Row(
         children: [
@@ -91,24 +90,24 @@ class _AppBarWidgetState extends ConsumerState<AppBarWidget> {
             IconButton(
               onPressed: () {},
               icon: const Icon(Icons.help),
-              color: kPrimaryColor,
+              color: AppColors.primaryColor,
             ),
             IconButton(
               onPressed: () {},
               icon: const Icon(Icons.brightness_4),
-              color: kPrimaryColor,
+              color: AppColors.primaryColor,
             ),
             const Text(
               "Alberto",
               style: TextStyle(
-                color: kPrimaryColor,
+                color: AppColors.primaryColor,
                 fontWeight: FontWeight.bold,
               ),
             ),
             IconButton(
               onPressed: () {},
               icon: const Icon(Icons.exit_to_app),
-              color: kPrimaryColor,
+              color: AppColors.primaryColor,
             ),
           ],
         ],
@@ -125,6 +124,5 @@ class _AppBarWidgetState extends ConsumerState<AppBarWidget> {
     ref.read(coachProvider).getCoachId(value);
     ref.read(reservationProvider).getReservationsByCoachId(
         coachId: ref.watch(coachProvider).selectedCoachId!);
-
   }
 }

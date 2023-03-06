@@ -1,5 +1,5 @@
 // An appointment model class for tennis court bookings and reservations
-import 'package:clients_digcoach/core/enums/reservation_status.dart';
+import 'package:clients_digcoach/models/reservation_status.dart';
 import 'package:clients_digcoach/models/coach.dart';
 
 class Reservation {
@@ -19,7 +19,7 @@ class Reservation {
     required this.clubId,
     required this.startTime,
     required this.endTime,
-     this.status,
+    this.status,
     required this.title,
     required this.coachId,
     required this.courtNumber,

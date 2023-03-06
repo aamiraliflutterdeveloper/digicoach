@@ -1,12 +1,11 @@
-import 'package:clients_digcoach/models/reservation.dart';
+import 'package:clients_digcoach/data/colors.dart';
 import 'package:clients_digcoach/providers/court_provider.dart';
+import 'package:clients_digcoach/utils/widget_utils.dart';
 import 'package:clients_digcoach/widgets/schedule/mouse_region_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
-import '../../core/constants/colors.dart';
-import '../../core/constants/functions.dart';
 import '../../providers/reservation_provider.dart';
 import '../drop_down_widget.dart';
 import '../form_dialog_widget.dart';
@@ -38,7 +37,7 @@ class _WeekViewWidgetState extends ConsumerState<WeekViewWidget> {
                   child: DropDownWidget(
                     hintText: 'Select Court',
                     currentValue: ref.watch(courtProvider).selectedCourtNumber,
-                    onChanged:(value)=> _onChangedCourt(value as int?),
+                    onChanged: (value) => _onChangedCourt(value as int?),
                     values: courts.map((e) => e.courtNumber).toList(),
                     items: courts.map((e) => e.name).toList(),
                   ),
@@ -50,7 +49,7 @@ class _WeekViewWidgetState extends ConsumerState<WeekViewWidget> {
                     child: SfCalendar(
                       view: CalendarView.week,
                       firstDayOfWeek: 1,
-                      allowedViews: const[
+                      allowedViews: const [
                         CalendarView.day,
                         CalendarView.week,
                         CalendarView.month,
@@ -77,9 +76,7 @@ class _WeekViewWidgetState extends ConsumerState<WeekViewWidget> {
 
   void _onChangedCourt(int? value) {
     ref.read(courtProvider).selectedCourtNumber = value!;
-    ref
-        .read(reservationProvider)
-        .getReservationsByCourtNumber(value);
+    ref.read(reservationProvider).getReservationsByCourtNumber(value);
   }
 
   void _onTap(CalendarTapDetails details) {
@@ -89,7 +86,7 @@ class _WeekViewWidgetState extends ConsumerState<WeekViewWidget> {
       print('week coachId---> $coachId');
 
       if (ref.watch(courtProvider).selectedCourtNumber != null) {
-        buildDialog(
+        WidgetUtils.buildDialog(
           context,
           child: FormDialogWidget(
             dateTime: dateTime,
@@ -98,7 +95,8 @@ class _WeekViewWidgetState extends ConsumerState<WeekViewWidget> {
           ),
         );
       } else {
-        buildDialog(context, child: Text('Select Court First'));
+        WidgetUtils.buildDialog(context,
+            child: const Text('Select Court First'));
       }
     }
   }
@@ -113,7 +111,7 @@ class _WeekViewWidgetState extends ConsumerState<WeekViewWidget> {
           .map((e) => Appointment(
                 startTime: e.startTime,
                 endTime: e.endTime,
-                color: kPrimaryColor,
+                color: AppColors.primaryColor,
                 subject: e.title,
               ))
           .toList();

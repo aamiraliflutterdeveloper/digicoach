@@ -1,13 +1,12 @@
-import 'package:clients_digcoach/core/responsive.dart';
+import 'package:clients_digcoach/data/colors.dart';
 import 'package:clients_digcoach/providers/court_provider.dart';
+import 'package:clients_digcoach/utils/responsive.dart';
+import 'package:clients_digcoach/utils/widget_utils.dart';
 import 'package:clients_digcoach/widgets/schedule/mouse_region_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
-import '../../core/constants/colors.dart';
-import '../../core/constants/functions.dart';
-import '../../providers/coach_provider.dart';
 import '../../providers/reservation_provider.dart';
 import '../form_dialog_widget.dart';
 
@@ -85,7 +84,7 @@ class _DayViewWidgetState extends ConsumerState<DayViewWidget> {
           1;
       print('courtNumber ---> $courtNumber');
 
-      buildDialog(
+      WidgetUtils.buildDialog(
         context,
         child: FormDialogWidget(
           dateTime: dateTime,
@@ -101,6 +100,7 @@ class _DayViewWidgetState extends ConsumerState<DayViewWidget> {
     responsive.init(context);
     final width = responsive.screenWidth;
     final courts = ref.watch(courtProvider).courtsByClubId;
+
     return Row(
       children: [
         if (responsive.isMobile) const SizedBox(width: 30),
@@ -121,7 +121,7 @@ class _DayViewWidgetState extends ConsumerState<DayViewWidget> {
                     courts[index + i].name,
                     style: const TextStyle(
                       fontSize: 16,
-                      color: kPrimaryColor,
+                      color: AppColors.primaryColor,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -178,7 +178,7 @@ class _DayViewWidgetState extends ConsumerState<DayViewWidget> {
         .map((e) => Appointment(
               startTime: e.startTime,
               endTime: e.endTime,
-              color: kPrimaryColor,
+              color: AppColors.primaryColor,
               subject: e.title,
             ))
         .toList();
@@ -193,7 +193,7 @@ class _DayViewWidgetState extends ConsumerState<DayViewWidget> {
         .map((e) => Appointment(
               startTime: e.startTime,
               endTime: e.endTime,
-              color: kPrimaryColor,
+              color: AppColors.primaryColor,
               subject: e.title,
             ))
         .toList();

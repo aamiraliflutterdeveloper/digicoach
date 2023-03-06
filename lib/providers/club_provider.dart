@@ -1,37 +1,31 @@
-import 'package:clients_digcoach/models/club.dart';
+import 'package:clients_digcoach/models/club/club.dart';
+import 'package:clients_digcoach/models/club/manager.dart';
 import 'package:clients_digcoach/repositories/club_repository.dart';
+import 'package:clients_digcoach/repositories/manager_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../core/enums/days_week.dart';
-import '../models/day.dart';
-import '../models/opening_hours.dart';
 
 final clubProvider = ChangeNotifierProvider((ref) => ClubProvider());
 
 class ClubProvider extends ChangeNotifier {
-  final ClubRepository _clubRepository = ClubRepository();
-  int _addClubCurrentTap = 0;
-  int _clubManagerCurrentIndex = 0;
-  List<Club> _clubs = [];
-  bool _isLoading = false;
-  String? _selectedClubId;
-  List<OpeningHours> _openingHoursByClubId = [];
+  final _clubRepository = ClubRepository();
+  final _managerRepository = ManagerRepository();
 
-  /// getters
+  List<Club> _clubs = [];
   List<Club> get clubs => _clubs;
 
-  List<OpeningHours> get openingHoursByClubId => _openingHoursByClubId;
+  List<Manager> _managers = [];
+  List<Manager> get managers => _managers;
 
+  String? _selectedClubId;
   String? get selectedClubId => _selectedClubId;
 
-  int get coachManagerCurrentIndex => _clubManagerCurrentIndex;
+  int _tabIndex = 0;
+  int get tabIndex => _tabIndex;
 
-  int get addClubCurrentTap => _addClubCurrentTap;
-
+  bool _isLoading = false;
   bool get isLoading => _isLoading;
 
-  /// setters
   void _loading(bool isLoading) {
     _isLoading = isLoading;
     notifyListeners();
@@ -42,23 +36,21 @@ class ClubProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  set coachManagerCurrentIndex(int index) {
-    _clubManagerCurrentIndex = index;
+  set tabIndex(int index) {
+    _tabIndex = index;
     notifyListeners();
   }
 
-  set addClubCurrentTap(int index) {
-    _addClubCurrentTap = index;
+  Future<Club> getClub() async {
+    final club = await _clubRepository.getClub();
+    selectedClubId = club.id;
     notifyListeners();
-  }
-
-  Future<String?> getClubId() async {
-    selectedClubId = await _clubRepository.getClubId();
-    notifyListeners();
-    return selectedClubId;
+    return club;
   }
 
   Future<void> removeClubById(String id) async {
+    if (id == clubs.first.id) return;
+
     _loading(true);
     await _clubRepository.removeClubById(id);
     _loading(false);
@@ -71,15 +63,41 @@ class ClubProvider extends ChangeNotifier {
   }
 
   Future<void> addClub(Club club) async {
-    _clubRepository.addClub(club);
+    final clubIds = _clubs.map((club) => club.id).toList();
+    final isEditing = clubIds.contains(club.id);
+
+    if (isEditing) {
+      final index = _clubs.indexWhere((oldClub) => oldClub.id == club.id);
+      final newClubs = List.of(_clubs);
+      newClubs[index] = club;
+
+      _clubs = newClubs;
+      notifyListeners();
+    } else {
+      _clubs.add(club);
+      notifyListeners();
+    }
+
+    //_clubRepository.addClub(club);
     notifyListeners();
   }
 
-  Future<void> getOpeningHoursByClubId() async {
-    _loading(true);
-    _openingHoursByClubId =
-        await _clubRepository.getOpeningHoursByClubId(_selectedClubId!);
+  Future<void> removeManagerById(String id) async {
+    if (id == managers.first.id) return;
 
+    _loading(true);
+    await _managerRepository.removeManagerById(id);
     _loading(false);
+  }
+
+  Future<List<Manager>> getManagers() async {
+    _managers = await _managerRepository.getManagers();
+    notifyListeners();
+    return _managers;
+  }
+
+  Future<void> addManager(Manager manager) async {
+    _managerRepository.addManager(manager);
+    notifyListeners();
   }
 }

@@ -1,8 +1,7 @@
+import 'package:clients_digcoach/utils/utils.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
-
-import '../../core/utils.dart';
 
 class MouseRegionWidget extends StatefulWidget {
   const MouseRegionWidget({

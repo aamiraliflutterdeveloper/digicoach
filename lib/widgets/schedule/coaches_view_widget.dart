@@ -1,10 +1,9 @@
+import 'package:clients_digcoach/data/colors.dart';
 import 'package:clients_digcoach/providers/court_provider.dart';
+import 'package:clients_digcoach/utils/widget_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
-
-import '../../core/constants/colors.dart';
-import '../../core/constants/functions.dart';
 import '../../providers/coach_provider.dart';
 import '../../providers/reservation_provider.dart';
 import '../form_dialog_widget.dart';
@@ -49,12 +48,11 @@ class _CoachesViewWidgetState extends ConsumerState<CoachesViewWidget> {
       final dateTime = details.date;
       final coachId = details.resource?.id;
       print('coach view coachId---> $coachId');
-      buildDialog(
+      WidgetUtils.buildDialog(
         context,
         child: FormDialogWidget(
           dateTime: dateTime,
           coachId: '$coachId',
-
           courtNumber: ref.watch(courtProvider).selectedCourtNumber,
         ),
       );
@@ -69,7 +67,7 @@ class _CoachesViewWidgetState extends ConsumerState<CoachesViewWidget> {
           (reservation) => Appointment(
               startTime: reservation.startTime,
               endTime: reservation.endTime,
-              color: kPrimaryColor,
+              color: AppColors.primaryColor,
               startTimeZone: '',
               endTimeZone: '',
               subject: reservation.title,
@@ -82,7 +80,7 @@ class _CoachesViewWidgetState extends ConsumerState<CoachesViewWidget> {
         .coachesByClubId
         .map(
           (coach) => CalendarResource(
-            color: kPrimaryColor,
+            color: AppColors.primaryColor,
             displayName: coach.name,
             id: coach.id,
             image: NetworkImage(coach.image ?? ''),

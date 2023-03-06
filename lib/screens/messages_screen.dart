@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 class MessagesScreen extends StatelessWidget {
@@ -6,7 +5,7 @@ class MessagesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const  Center(
+    return const Center(
       child: Text('Messages Screen'),
     );
   }

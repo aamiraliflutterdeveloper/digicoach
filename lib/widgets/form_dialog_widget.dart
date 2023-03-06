@@ -1,12 +1,11 @@
-import 'package:clients_digcoach/core/utils.dart';
 import 'package:clients_digcoach/models/reservation.dart';
 import 'package:clients_digcoach/providers/club_provider.dart';
 import 'package:clients_digcoach/providers/reservation_provider.dart';
-import 'package:clients_digcoach/widgets/button_widget.dart';
+import 'package:clients_digcoach/utils/utils.dart';
 import 'package:clients_digcoach/widgets/drop_down_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../core/enums/reservation_status.dart';
+import '../models/reservation_status.dart';
 import '../providers/coach_provider.dart';
 import '../providers/court_provider.dart';
 import 'text_form_field_widget.dart';
@@ -105,8 +104,7 @@ class _FormDialogWidgetState extends ConsumerState<FormDialogWidget> {
               children: [
                 const Text('start'),
                 TextFormFieldWidget(
-                  hintText:
-                      Utils.toDateTime(startDateTime),
+                  hintText: Utils.toDateTime(startDateTime),
                   isSuffix: true,
                   dateOnPressed: () => pickStartDateTime(true),
                   timeOnPressed: () => pickStartDateTime(false),
@@ -121,8 +119,7 @@ class _FormDialogWidgetState extends ConsumerState<FormDialogWidget> {
               children: [
                 const Text('end'),
                 TextFormFieldWidget(
-                  hintText:
-                      Utils.toDateTime(endDateTime),
+                  hintText: Utils.toDateTime(endDateTime),
                   isSuffix: true,
                   dateOnPressed: () => pickEndDateTime(true),
                   timeOnPressed: () => pickEndDateTime(false),
@@ -142,10 +139,9 @@ class _FormDialogWidgetState extends ConsumerState<FormDialogWidget> {
             child: const Text('Cancel'),
           ),
           const SizedBox(width: 16),
-          ButtonWidget(
-            title: 'Save',
-            fixedSize: Size(width / 12, 30),
+          ElevatedButton(
             onPressed: _addReservation,
+            child: const Text('Save'),
           ),
         ],
       );

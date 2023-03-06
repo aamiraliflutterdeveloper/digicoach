@@ -1,6 +1,5 @@
+import 'package:clients_digcoach/data/colors.dart';
 import 'package:flutter/material.dart';
-
-import '../core/constants/colors.dart';
 
 class ConvexTabWidget extends StatelessWidget {
   const ConvexTabWidget({
@@ -23,25 +22,27 @@ class ConvexTabWidget extends StatelessWidget {
       topRight: Radius.circular(15),
     );
     return InkWell(
-        borderRadius: convexBorder,
-        onTap: onTap,
-        child: Container(
-          height:40,
-          width: 150,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: currentIndex == index ? kSecondaryColor : kPrimaryColor,
-            borderRadius: convexBorder,
-          ),
-          child: Text(
-            titles[index],
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
+      borderRadius: convexBorder,
+      onTap: onTap,
+      child: Container(
+        height: 40,
+        width: 150,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: currentIndex == index
+              ? AppColors.secondaryColor
+              : AppColors.primaryColor,
+          borderRadius: convexBorder,
+        ),
+        child: Text(
+          titles[index],
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
           ),
         ),
-      );
+      ),
+    );
   }
 }

@@ -1,10 +1,14 @@
 import 'dart:typed_data';
 
-import 'package:clients_digcoach/core/constants/colors.dart';
-import 'package:clients_digcoach/models/club.dart';
-import 'package:clients_digcoach/models/general_info.dart';
-import 'package:clients_digcoach/repositories/club_repository.dart';
-import 'package:clients_digcoach/widgets/button_widget.dart';
+import 'package:clients_digcoach/data/clubs.dart';
+import 'package:clients_digcoach/data/colors.dart';
+import 'package:clients_digcoach/models/club/club.dart';
+import 'package:clients_digcoach/models/club/general_info.dart';
+import 'package:clients_digcoach/utils/utils.dart';
+import 'package:clients_digcoach/utils/widget_utils.dart';
+import 'package:clients_digcoach/widgets/address_widget.dart';
+import 'package:clients_digcoach/widgets/phone_number_widget.dart';
+import 'package:clients_digcoach/widgets/photos_picker_widget.dart';
 import 'package:clients_digcoach/widgets/text_form_field_widget.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:file_picker/file_picker.dart';
@@ -12,7 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 
-import '../../core/constants/functions.dart';
+import '../../providers/add_club_provider.dart';
 import '../../providers/club_provider.dart';
 
 class GeneralInfoWidget extends ConsumerStatefulWidget {
@@ -24,14 +28,11 @@ class GeneralInfoWidget extends ConsumerStatefulWidget {
 }
 
 class _GeneralInfoWidgetState extends ConsumerState<GeneralInfoWidget> {
-  final images = [];
-  Uint8List? image;
+  final List<Uint8List> images = [];
   Club? club;
 
-  ///
-  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  final formKey = GlobalKey<FormState>();
 
-  ///
   final phoneController = TextEditingController();
   final nameController = TextEditingController();
   final descriptionController = TextEditingController();
@@ -45,54 +46,31 @@ class _GeneralInfoWidgetState extends ConsumerState<GeneralInfoWidget> {
   final twitterUrlController = TextEditingController();
   final tiktokUrlController = TextEditingController();
   final emailController = TextEditingController();
-  final surNameController = TextEditingController();
+  final surnameController = TextEditingController();
   final ceoNameController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    const style = TextStyle(
-      fontSize: 20,
-      fontWeight: FontWeight.bold,
-    );
+    const style = TextStyle(fontSize: 20, fontWeight: FontWeight.bold);
+
     return Form(
       key: formKey,
-      child: ListView(
-        padding: padding(context),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          requiredText('Name'),
+          WidgetUtils.requiredText('Name'),
           const SizedBox(height: 10),
           TextFormFieldWidget(
             autovalidateMode: AutovalidateMode.onUserInteraction,
-            hintText: 'Name ',
+            hintText: 'Name',
             controller: nameController,
             isRequired: true,
           ),
-
           const SizedBox(height: 30),
-
-          ///
-          requiredText('Phone'),
+          WidgetUtils.requiredText('Phone'),
           const SizedBox(height: 10),
-          InternationalPhoneNumberInput(
-            onInputChanged: (PhoneNumber number) => print(number.phoneNumber),
-            onInputValidated: (bool value) => print(value),
-            selectorConfig: const SelectorConfig(
-              selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
-            ),
-            autoValidateMode: AutovalidateMode.onUserInteraction,
-            selectorTextStyle: const TextStyle(color: Colors.black),
-            initialValue: PhoneNumber(isoCode: 'US'),
-            textFieldController: phoneController,
-            keyboardType: const TextInputType.numberWithOptions(
-              signed: true,
-              decimal: true,
-            ),
-            inputBorder: const OutlineInputBorder(),
-          ),
-
+          PhoneNumberWidget(phoneController: phoneController),
           const SizedBox(height: 30),
-
-          ///
           const Text('Description', style: style),
           const SizedBox(height: 10),
           TextFormFieldWidget(
@@ -103,52 +81,16 @@ class _GeneralInfoWidgetState extends ConsumerState<GeneralInfoWidget> {
           const SizedBox(height: 30),
           const Text('Location', style: style),
           const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(
-                child: TextFormFieldWidget(
-                  hintText: 'Country',
-                  controller: countryController,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: TextFormFieldWidget(
-                  hintText: 'City',
-                  controller: cityController,
-                  isRequired: true,
-                ),
-              ),
-            ],
+          AddressWidget(
+            cityController: cityController,
+            countryController: countryController,
+            postalCodeController: postalCodeController,
+            streetController: streetController,
           ),
           const SizedBox(height: 30),
-          Row(
-            children: [
-              Expanded(
-                child: TextFormFieldWidget(
-                  hintText: 'Street',
-                  controller: streetController,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: TextFormFieldWidget(
-                  hintText: 'Postal code',
-                  controller: postalCodeController,
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 30),
-
-          ///
           const Text('Images', style: style),
           const SizedBox(height: 10),
-          SizedBox(
-            height: 100,
-            child: _pickImage(),
-          ),
+          PhotosPickerWidget(images: images),
           const SizedBox(height: 30),
           const Text('Website Url', style: style),
           const SizedBox(height: 10),
@@ -156,7 +98,7 @@ class _GeneralInfoWidgetState extends ConsumerState<GeneralInfoWidget> {
             autovalidateMode: AutovalidateMode.onUserInteraction,
             hintText: 'Url',
             controller: websiteUrlController,
-            validator: (value) => urlValidation(value!) ? null : 'Invalid Url',
+            validator: (url) => Utils.isUrlValid(url!) ? null : 'Invalid Url',
           ),
           const SizedBox(height: 30),
           const Text('Email', style: style),
@@ -176,11 +118,11 @@ class _GeneralInfoWidgetState extends ConsumerState<GeneralInfoWidget> {
             controller: ceoNameController,
           ),
           const SizedBox(height: 30),
-          const Text('Sur Name', style: style),
+          const Text('Surname', style: style),
           const SizedBox(height: 10),
           TextFormFieldWidget(
-            hintText: 'Sur Name',
-            controller: surNameController,
+            hintText: 'Surname',
+            controller: surnameController,
           ),
           const SizedBox(height: 30),
           const Text('Social', style: style),
@@ -189,70 +131,67 @@ class _GeneralInfoWidgetState extends ConsumerState<GeneralInfoWidget> {
             autovalidateMode: AutovalidateMode.onUserInteraction,
             hintText: 'Facebook Url',
             controller: facebookUrlController,
-            validator: (value) => urlValidation(value!) ? null : 'Invalid Url',
+            validator: (url) => Utils.isUrlValid(url!) ? null : 'Invalid Url',
           ),
           const SizedBox(height: 10),
           TextFormFieldWidget(
             autovalidateMode: AutovalidateMode.onUserInteraction,
             hintText: 'Instagram Url',
             controller: instagramUrlController,
-            validator: (value) => urlValidation(value!) ? null : 'Invalid Url',
+            validator: (url) => Utils.isUrlValid(url!) ? null : 'Invalid Url',
           ),
           const SizedBox(height: 10),
           TextFormFieldWidget(
             autovalidateMode: AutovalidateMode.onUserInteraction,
             hintText: 'Twitter Url',
             controller: twitterUrlController,
-            validator: (value) => urlValidation(value!) ? null : 'Invalid Url',
+            validator: (url) => Utils.isUrlValid(url!) ? null : 'Invalid Url',
           ),
           const SizedBox(height: 10),
           TextFormFieldWidget(
             autovalidateMode: AutovalidateMode.onUserInteraction,
             hintText: 'TikTok Url',
             controller: tiktokUrlController,
-            validator: (value) => urlValidation(value!) ? null : 'Invalid Url',
+            validator: (url) => Utils.isUrlValid(url!) ? null : 'Invalid Url',
           ),
           const SizedBox(height: 10),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              ButtonWidget(
-                title: 'Next',
-                fixedSize: const Size(100, 50),
-                onPressed: () async{
-
-                await  ref.read(clubProvider).addClub(
-                        Club(
-                          id: '${clubs.length + 1}',
-                          generalInfo: GeneralInfo(
-                            id: '${clubs.length + 1}',
-                            name: nameController.text,
-                            phone: phoneController.text,
-                            email: emailController.text,
-                            city: cityController.text,
-                            active: true,
-                            ceoName: ceoNameController.text,
-                            country: countryController.text,
-                            description: descriptionController.text,
-                            facebook: facebookUrlController.text,
-                            images: images as List<String>,
-                            instagram: instagramUrlController.text,
-                            postalCode: postalCodeController.text,
-                            street: streetController.text,
-                            surName: surNameController.text,
-                            tiktok: tiktokUrlController.text,
-                            twitter: twitterUrlController.text,
-                            url: websiteUrlController.text,
-                          ),
-                          amenities: [],
-                          coaches: [],
-                          courts: [],
-                          days: [],
-                          holidays: [],
-                          reservations: [],
-                        ),
-                      );
-                  ref.watch(clubProvider).addClubCurrentTap = 1;
+              ElevatedButton(
+                child: const Text('Next'),
+                onPressed: () async {
+                  // final club = Club(
+                  //   id: '${clubs.length + 1}',
+                  //   generalInfo: GeneralInfo(
+                  //     id: '${clubs.length + 1}',
+                  //     name: nameController.text,
+                  //     phone: phoneController.text,
+                  //     email: emailController.text,
+                  //     city: cityController.text,
+                  //     ceoName: ceoNameController.text,
+                  //     country: countryController.text,
+                  //     description: descriptionController.text,
+                  //     facebook: facebookUrlController.text,
+                  //     images: images,
+                  //     instagram: instagramUrlController.text,
+                  //     postalCode: postalCodeController.text,
+                  //     street: streetController.text,
+                  //     surname: surnameController.text,
+                  //     tiktok: tiktokUrlController.text,
+                  //     twitter: twitterUrlController.text,
+                  //     url: websiteUrlController.text,
+                  //   ),
+                  //   amenities: [],
+                  //   coaches: [],
+                  //   courts: [],
+                  //   openingHours: [],
+                  //   holidays: [],
+                  //   reservations: [],
+                  // );
+                  //
+                  // await ref.read(clubProvider).addClub(club);
+                  ref.read(addClubProvider).tabIndex = 1;
                 },
               ),
             ],
@@ -260,59 +199,5 @@ class _GeneralInfoWidgetState extends ConsumerState<GeneralInfoWidget> {
         ],
       ),
     );
-  }
-
-  Row _pickImage() => Row(
-        children: [
-          InkWell(
-            onTap: _onTap,
-            child: SizedBox(
-              height: 100,
-              width: 100,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
-                  Icon(
-                    Icons.add_a_photo,
-                    color: kPrimaryColor,
-                    size: 70,
-                  ),
-                  Text('Add Image', style: TextStyle(fontSize: 20)),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: images.length,
-              separatorBuilder: (context, _) => const SizedBox(width: 10),
-              itemBuilder: (context, index) => Image.memory(
-                images[index],
-                fit: BoxFit.cover,
-                width: 200,
-                height: 100,
-              ),
-            ),
-          ),
-        ],
-      );
-
-  Future<void> _onTap() async {
-    FilePickerResult? result =
-        await FilePicker.platform.pickFiles(type: FileType.image);
-
-    if (result != null) {
-      Uint8List? fileBytes = result.files.first.bytes;
-      String fileName = result.files.first.name;
-      setState(() {
-        image = fileBytes;
-        images.add(image);
-      });
-
-      // Upload file
-      // await FirebaseStorage.instance.ref('uploads/$fileName').putData(fileBytes);
-    }
   }
 }
