@@ -83,7 +83,7 @@ class _CoachesViewWidgetState extends ConsumerState<CoachesViewWidget> {
             color: AppColors.primaryColor,
             displayName: coach.name,
             id: coach.id,
-            image: NetworkImage(coach.image ?? ''),
+            image: NetworkImage(coach.photoUrl![0] ?? ''),
           ),
         )
         .toList();

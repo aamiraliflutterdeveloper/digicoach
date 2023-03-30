@@ -3,8 +3,6 @@ import 'package:clients_digcoach/providers/coach_provider.dart';
 import 'package:clients_digcoach/widgets/coaches/coach_card_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../../providers/club_provider.dart';
 import '../../widgets/convex_tab_widget.dart';
 
 class CoachesScreen extends ConsumerStatefulWidget {
@@ -58,3 +56,9 @@ class _CoachesScreenState extends ConsumerState<CoachesScreen> {
         ),
       );
 }
+
+
+
+
+
+

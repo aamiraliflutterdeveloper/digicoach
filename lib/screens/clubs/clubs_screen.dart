@@ -1,13 +1,9 @@
 import 'package:clients_digcoach/data/colors.dart';
 import 'package:clients_digcoach/models/end_drawer_popup.dart';
 import 'package:clients_digcoach/providers/club_provider.dart';
-import 'package:clients_digcoach/screens/clubs/add_club_screen.dart';
-import 'package:clients_digcoach/screens/clubs/add_manager_screen.dart';
-import 'package:clients_digcoach/widgets/clubs/club_data_grid_widget.dart';
 import 'package:clients_digcoach/widgets/clubs/manager_data_grid_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../../providers/home_provider.dart';
 import '../../widgets/clubs/club_card_widget.dart';
 import '../../widgets/convex_tab_widget.dart';
@@ -103,7 +99,8 @@ class ManagersCardWidget extends ConsumerWidget {
                   onPressed: () {
                     ref.read(homeProvider).endDrawerPopup =
                         EndDrawerPopup.addManager;
-
+                    ref.read(clubProvider).setIsFromEdit(false);
+                    ref.read(clubProvider).getPermissions();
                     Scaffold.of(context).openEndDrawer();
                   },
                 ),
@@ -125,3 +122,8 @@ class ManagersCardWidget extends ConsumerWidget {
     );
   }
 }
+
+
+
+
+

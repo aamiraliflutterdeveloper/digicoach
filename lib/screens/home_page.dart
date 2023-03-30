@@ -38,16 +38,21 @@ class _HomePageState extends ConsumerState<HomePage> {
   @override
   void initState() {
     super.initState();
-
-    _fetchData();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchData();
+    });
   }
 
   Future<void> _fetchData() async {
+
+    if (context.mounted) {
+       ref.read(clubProvider).getManagers(context);
+      await ref.read(coachProvider).getCoaches(context);
+    }
     await ref.read(clubProvider).getClubs();
-    await ref.read(clubProvider).getManagers();
     await ref.read(clubProvider).getClub();
     await ref.read(courtProvider).getCourts();
-    await ref.read(coachProvider).getCoaches();
+
     await ref.read(reservationProvider).getReservations();
   }
 
@@ -64,6 +69,8 @@ class _HomePageState extends ConsumerState<HomePage> {
       appBar: const AppBarWidget(),
       drawer: isDesktop ? null : const DrawerWidget(),
       endDrawer: buildEndDrawer(),
+      onEndDrawerChanged: (val) =>
+          ref.watch(homeProvider).endDrawerChanges = val,
       body: Row(
         children: [
           if (isDesktop) const Expanded(child: DrawerWidget()),

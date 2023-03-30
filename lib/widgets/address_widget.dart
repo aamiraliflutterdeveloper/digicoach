@@ -32,7 +32,6 @@ class AddressWidget extends StatelessWidget {
               child: TextFormFieldWidget(
                 hintText: 'City',
                 controller: cityController,
-                isRequired: true,
               ),
             ),
           ],

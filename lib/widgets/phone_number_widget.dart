@@ -3,16 +3,12 @@ import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 
 class PhoneNumberWidget extends StatelessWidget {
   final TextEditingController phoneController;
-
-  const PhoneNumberWidget({
-    super.key,
-    required this.phoneController,
-  });
+  const PhoneNumberWidget({Key? key, required this.phoneController}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return InternationalPhoneNumberInput(
-      onInputChanged: (number) => print(number.phoneNumber),
+      onInputChanged: (number) => print("sjdsdl"),
       onInputValidated: (value) => print(value),
       selectorConfig: SelectorConfig(
         selectorType: PhoneInputSelectorType.DROPDOWN,

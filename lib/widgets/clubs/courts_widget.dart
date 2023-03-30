@@ -172,7 +172,6 @@ class _CourtsWidgetState extends ConsumerState<CourtsWidget> {
               separatorBuilder: (context, index) => const SizedBox(width: 10),
               itemBuilder: (context, index) {
                 final court = courts[index];
-
                 return TabWidget(
                   index: index,
                   currentIndex: courtIndex,

@@ -1,5 +1,7 @@
 import 'dart:typed_data';
-
+import 'package:clients_digcoach/models/coach.dart';
+import 'package:clients_digcoach/providers/coach_provider.dart';
+import 'package:clients_digcoach/providers/home_provider.dart';
 import 'package:clients_digcoach/utils/utils.dart';
 import 'package:clients_digcoach/utils/widget_utils.dart';
 import 'package:clients_digcoach/widgets/address_widget.dart';
@@ -11,6 +13,7 @@ import 'package:clients_digcoach/widgets/text_form_field_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 class AddCoachScreen extends ConsumerStatefulWidget {
   const AddCoachScreen({super.key});
@@ -24,97 +27,249 @@ class _AddCoachScreenState extends ConsumerState<AddCoachScreen> {
   int genderIndex = 0;
   int coachingLevel = 1;
   DateTime birthday = DateTime.now();
+  String _selectedDate = '';
 
   final phoneController = TextEditingController();
   final nameController = TextEditingController();
   final surnameController = TextEditingController();
+  final secSurNameController = TextEditingController();
   final descriptionController = TextEditingController();
-  final emailController = TextEditingController();
   final countryController = TextEditingController();
   final cityController = TextEditingController();
   final streetController = TextEditingController();
   final postalCodeController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
+  bool _isFirstTime = true;
+
+  List<String> editImages = [];
+
+  _editCoach() {
+    phoneController.text = ref.watch(coachProvider).currentCoach!.phone;
+    nameController.text = ref.watch(coachProvider).currentCoach!.name;
+    surnameController.text = ref.watch(coachProvider).currentCoach!.surname;
+    secSurNameController.text = ref.watch(coachProvider).currentCoach!.secondSurName!;
+    descriptionController.text = ref.watch(coachProvider).currentCoach!.description!;
+    genderIndex = ref.watch(coachProvider).currentCoach!.isMale == true ? 0 : 1;
+    editImages = ref.read(coachProvider).currentCoach!.photoUrl!;
+    coachingLevel = ref.read(coachProvider).currentCoach!.coachingLevel;
+
+    countryController.text = ref.watch(coachProvider).currentCoach!.country!;
+    cityController.text = ref.watch(coachProvider).currentCoach!.city!;
+    streetController.text = ref.watch(coachProvider).currentCoach!.street!;
+    postalCodeController.text = ref.watch(coachProvider).currentCoach!.postalCode!;
+    _selectedDate = ref.watch(coachProvider).currentCoach!.birthDate;
+    _isFirstTime = false;
+  }
+
+  _resetCoach() {
+    phoneController.text = '';
+    nameController.text = '';
+    secSurNameController.text = '';
+    secSurNameController.text = '';
+    genderIndex = 0;
+    birthday = DateTime.now();
+    _selectedDate = '';
+    coachingLevel = 1;
+    _isFirstTime = false;
+
+  }
+
+
+  /// As we come to the drawer ... it does run dispose method ...
+  /// we have to deal with edit and add both on one page...
+  /// When we come to edit data stored in forms ... go back and then again come on this page from add button side then we have to clear the previous form value
+  /// for this purpose we listen to the end drawer changing ...
+
+  _checkForm() {
+    if(ref.watch(homeProvider).endDrawerStatus == true && ref.watch(coachProvider).isEdit == true) {
+      _editCoach();
+    } else {
+      _resetCoach();
+    }
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
+    if(_isFirstTime)_checkForm(); _isFirstTime = false;
     const style = TextStyle(fontSize: 20, fontWeight: FontWeight.bold);
     final genders = ['Male', 'Female'];
 
     return Scaffold(
-      body: ListView(
-        padding: WidgetUtils.padding(context, maxPadding: 16),
+      body: Column(
         children: [
-          WidgetUtils.requiredText('Name'),
-          const SizedBox(height: 10),
-          TextFormFieldWidget(
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            hintText: 'Name',
-            controller: nameController,
-            isRequired: true,
-          ),
-          const SizedBox(height: 30),
-          WidgetUtils.requiredText('Surname'),
-          const SizedBox(height: 10),
-          TextFormFieldWidget(
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            hintText: 'Surname',
-            controller: surnameController,
-            isRequired: true,
-          ),
-          const SizedBox(height: 30),
-          const Text('Description', style: style),
-          const SizedBox(height: 10),
-          TextFormFieldWidget(
-            hintText: 'Description',
-            controller: descriptionController,
-            maxLines: 5,
-          ),
-          const SizedBox(height: 30),
-          WidgetUtils.requiredText('Phone'),
-          const SizedBox(height: 10),
-          PhoneNumberWidget(phoneController: phoneController),
-          const SizedBox(height: 30),
-          const Text('Gender', style: style),
-          const SizedBox(height: 10),
-          ChoiceWidget(
-            titles: genders,
-            currentIndex: genderIndex,
-            onChangedIndex: (genderIndex) {},
-          ),
-          const SizedBox(height: 30),
-          const Text('Coaching Level', style: style),
-          const SizedBox(height: 10),
-          CoachingSliderWidget(
-            indexSlider: coachingLevel,
-            onChanged: (value) {
-              setState(() {
-                coachingLevel = value;
-              });
-            },
-          ),
-          const SizedBox(height: 30),
-          const Text('Address', style: style),
-          const SizedBox(height: 10),
-          AddressWidget(
-            cityController: cityController,
-            countryController: countryController,
-            postalCodeController: postalCodeController,
-            streetController: streetController,
-          ),
-          const SizedBox(height: 30),
-          const Text('Image', style: style),
-          const SizedBox(height: 10),
-          PhotosPickerWidget(images: images, maxPickedImages: 1),
-          const SizedBox(height: 30),
-          const Text('Birthday', style: style),
-          const SizedBox(height: 10),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: BirthdayPickerWidget(
-              dateTime: birthday,
-              onChanged: (birthday) {
-                setState(() => this.birthday = birthday);
-              },
+          Expanded(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: WidgetUtils.padding(context, maxPadding: 16),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      WidgetUtils.requiredText('Name'),
+                      const SizedBox(height: 10),
+                      TextFormFieldWidget(
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        hintText: 'Name',
+                        controller: nameController,
+                        isRequired: true,
+                      ),
+                      const SizedBox(height: 30),
+                      // surname and second surname ...
+                      SizedBox(
+                        height: 115,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  WidgetUtils.requiredText('Surname'),
+                                  const SizedBox(height: 10),
+                                  TextFormFieldWidget(
+                                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                                    hintText: 'Surname',
+                                    controller: surnameController,
+                                    isRequired: true,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 15),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text("Second Surname", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                                  const SizedBox(height: 10),
+                                  TextFormFieldWidget(
+                                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                                    hintText: 'Second Surname',
+                                    controller: secSurNameController,
+                                    isRequired: false,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // WidgetUtils.requiredText('Surname'),
+                      // const SizedBox(height: 10),
+                      // TextFormFieldWidget(
+                      //   autovalidateMode: AutovalidateMode.onUserInteraction,
+                      //   hintText: 'Surname',
+                      //   controller: surnameController,
+                      //   isRequired: true,
+                      // ),
+                      const SizedBox(height: 30),
+                      const Text('Description', style: style),
+                      const SizedBox(height: 10),
+                      TextFormFieldWidget(
+                        hintText: 'Description',
+                        controller: descriptionController,
+                        maxLines: 5,
+                      ),
+                      const SizedBox(height: 30),
+                      WidgetUtils.requiredText('Phone'),
+                      const SizedBox(height: 10),
+                      PhoneNumberWidget(phoneController: phoneController),
+                      const SizedBox(height: 30),
+                      const Text('Gender', style: style),
+                      const SizedBox(height: 10),
+                      ChoiceWidget(
+                        titles: genders,
+                        currentIndex: genderIndex,
+                        onChangedIndex: (genderIndex) {
+                          genderIndex = genderIndex;
+                          setState(() {});
+                        },
+                      ),
+                      const SizedBox(height: 30),
+                      const Text('Coaching Level', style: style),
+                      const SizedBox(height: 10),
+                      CoachingSliderWidget(
+                        indexSlider: coachingLevel,
+                        onChanged: (value) {
+                          setState(() {
+                            coachingLevel = value;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 30),
+                      const Text('Address', style: style),
+                      const SizedBox(height: 10),
+                      AddressWidget(
+                        cityController: cityController,
+                        countryController: countryController,
+                        postalCodeController: postalCodeController,
+                        streetController: streetController,
+                      ),
+                      const SizedBox(height: 30),
+                      const Text('Image', style: style),
+                      const SizedBox(height: 10),
+                      PhotosPickerWidget(images: images, maxPickedImages: 1, editImages: editImages),
+                      const SizedBox(height: 30),
+                      const Text('Birthday', style: style),
+                      const SizedBox(height: 10),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: BirthdayPickerWidget(
+                          dateTime: birthday,
+                          onChanged: (birthday) {
+                            setState(() {
+                              this.birthday = birthday;
+                              var outputFormat = DateFormat('MM/dd/yyyy hh:mm a');
+                              _selectedDate = outputFormat.format(this.birthday);
+                            });
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          ElevatedButton(
+                            child: const Text('Submit'),
+                            onPressed: () async {
+                              if(_formKey.currentState!.validate()) {
+                                Coach coach = Coach(
+                                    id: ref.watch(coachProvider).isEdit ? ref.read(coachProvider).currentCoach!.id : '',
+                                    // clubsId: [],
+                                    name: nameController.text,
+                                    surname: surnameController.text,
+                                    secondSurName: secSurNameController.text,
+                                    phone: phoneController.text,
+                                    active: false,
+                                    coachingLevel: coachingLevel,
+                                    description: descriptionController.text,
+                                  isMale: genders[genderIndex] == 'Male' ? true : false,
+                                  country: countryController.text,
+                                  city: cityController.text,
+                                    photoUrlInBytes: images,
+                                  photoUrl: ref.watch(coachProvider).isEdit ? ref.watch(coachProvider).currentCoach!.photoUrl : [],
+                                  birthDate: _selectedDate,
+                                  street: streetController.text,
+                                  postalCode: postalCodeController.text
+                                );
+                                if(ref.watch(coachProvider).isEdit) {
+                                  ref.watch(coachProvider).updateCoach(coach, context);
+                                } else {
+                                  ref.watch(coachProvider).addCoach(coach, context);
+                                }
+
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                    ],
+                  ),
+                ),
+              ),
             ),
           ),
         ],

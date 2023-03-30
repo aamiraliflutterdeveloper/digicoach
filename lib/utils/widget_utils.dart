@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:clients_digcoach/utils/responsive.dart';
+import 'package:clients_digcoach/widgets/loading_widget.dart';
 import 'package:flutter/material.dart';
 
 class WidgetUtils {
@@ -35,6 +36,19 @@ class WidgetUtils {
       ),
     );
   }
+
+  /// loading dialog ...
+  static Future<void> loadingDialog(BuildContext context, String title) async{
+    return showDialog(
+        useSafeArea: false,
+        context: context,
+        barrierColor: Colors.transparent,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return  LoadingWidget(title: title);
+        });
+  }
+
 
   static EdgeInsets padding(
     BuildContext context, {

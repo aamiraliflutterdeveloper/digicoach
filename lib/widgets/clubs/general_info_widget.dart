@@ -1,9 +1,5 @@
 import 'dart:typed_data';
-
-import 'package:clients_digcoach/data/clubs.dart';
-import 'package:clients_digcoach/data/colors.dart';
 import 'package:clients_digcoach/models/club/club.dart';
-import 'package:clients_digcoach/models/club/general_info.dart';
 import 'package:clients_digcoach/utils/utils.dart';
 import 'package:clients_digcoach/utils/widget_utils.dart';
 import 'package:clients_digcoach/widgets/address_widget.dart';
@@ -11,13 +7,9 @@ import 'package:clients_digcoach/widgets/phone_number_widget.dart';
 import 'package:clients_digcoach/widgets/photos_picker_widget.dart';
 import 'package:clients_digcoach/widgets/text_form_field_widget.dart';
 import 'package:email_validator/email_validator.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl_phone_number_input/intl_phone_number_input.dart';
-
 import '../../providers/add_club_provider.dart';
-import '../../providers/club_provider.dart';
 
 class GeneralInfoWidget extends ConsumerStatefulWidget {
   const GeneralInfoWidget({super.key});

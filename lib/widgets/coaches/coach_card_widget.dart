@@ -1,12 +1,10 @@
 import 'package:clients_digcoach/data/colors.dart';
 import 'package:clients_digcoach/models/end_drawer_popup.dart';
-import 'package:clients_digcoach/screens/coaches/add_coach_screen.dart';
+import 'package:clients_digcoach/providers/coach_provider.dart';
 import 'package:clients_digcoach/widgets/coaches/coach_data_grid_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/home_provider.dart';
-import '../../screens/clubs/add_club_screen.dart';
-import '../clubs/club_data_grid_widget.dart';
 
 class CoachesCardWidget extends ConsumerWidget {
   const CoachesCardWidget({super.key});
@@ -55,7 +53,7 @@ class CoachesCardWidget extends ConsumerWidget {
                     onPressed: () {
                       ref.read(homeProvider).endDrawerPopup =
                           EndDrawerPopup.addCoach;
-
+                      ref.read(coachProvider).setIsEdit(false);
                       Scaffold.of(context).openEndDrawer();
                     },
                   ),

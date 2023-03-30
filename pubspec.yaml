@@ -24,6 +24,10 @@ dependencies:
   file_picker: ^5.2.5
   email_validator: ^2.1.17
   syncfusion_flutter_datepicker: ^20.4.52
+  cloud_firestore: ^4.4.4
+  firebase_storage: ^11.0.15
+  cached_network_image: ^3.2.3
+  loading_animation_widget: ^1.2.0+4
 
 dev_dependencies:
   flutter_test:
@@ -36,3 +40,7 @@ flutter:
 
   assets:
     - assets/images/
+
+
+
+

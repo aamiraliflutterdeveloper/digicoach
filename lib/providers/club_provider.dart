@@ -2,6 +2,7 @@ import 'package:clients_digcoach/models/club/club.dart';
 import 'package:clients_digcoach/models/club/manager.dart';
 import 'package:clients_digcoach/repositories/club_repository.dart';
 import 'package:clients_digcoach/repositories/manager_repository.dart';
+import 'package:clients_digcoach/utils/widget_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -17,6 +18,22 @@ class ClubProvider extends ChangeNotifier {
   List<Manager> _managers = [];
   List<Manager> get managers => _managers;
 
+  bool _isFromEdit = false;
+  bool get isFromEdit => _isFromEdit;
+
+  Manager? _currentManager;
+  Manager? get currentManager => _currentManager;
+
+
+
+  bool _manageAllClubs = false;
+
+  bool? get getManageClub => _manageAllClubs;
+
+  List<Permission> _permissions = [];
+
+  List<Permission>? get permissions => _permissions;
+
   String? _selectedClubId;
   String? get selectedClubId => _selectedClubId;
 
@@ -28,6 +45,11 @@ class ClubProvider extends ChangeNotifier {
 
   void _loading(bool isLoading) {
     _isLoading = isLoading;
+    notifyListeners();
+  }
+
+  set manageAllClub(bool manage) {
+    _manageAllClubs = manage;
     notifyListeners();
   }
 
@@ -82,22 +104,130 @@ class ClubProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> removeManagerById(String id) async {
-    if (id == managers.first.id) return;
 
-    _loading(true);
-    await _managerRepository.removeManagerById(id);
-    _loading(false);
+  Future<void> removeManagerById(Manager manager, BuildContext context) async {
+    try{
+      WidgetUtils.loadingDialog(context, 'Removing Manager ....');
+     final deletedManager = await _managerRepository.deleteManager(manager);
+      _managers.remove(deletedManager);
+      notifyListeners();
+      if(context.mounted) {
+        Navigator.pop(context);
+      }
+    } on Exception catch(e) {
+      if(context.mounted) {
+        Navigator.pop(context);
+      }
+      WidgetUtils.buildDialog(context, child: Text("Something Wrong ${e.toString()}"));
+    }
+
   }
 
-  Future<List<Manager>> getManagers() async {
-    _managers = await _managerRepository.getManagers();
+
+  Future<void> getManagers(BuildContext context) async {
+    try{
+      _loading(true);
+      final managers = await _managerRepository.getManagers();
+      _managers = managers;
+      notifyListeners();
+      _loading(false);
+    } on Exception catch(e) {
+      _loading(false);
+      WidgetUtils.buildDialog(context, child: Text("Something Wrong ${e.toString()}"));
+    }
+  }
+
+
+
+  Future<void> addManager(Manager manager, BuildContext context) async {
+    try{
+      WidgetUtils.loadingDialog(context, 'Creating New Manager ....');
+      Manager completeManager = await _managerRepository.addManager(manager);
+      /// add managers locally ...
+      _managers.insert(0, completeManager);
+      notifyListeners();
+      if(context.mounted) {
+        Navigator.pop(context);
+        Navigator.pop(context);
+      }
+    } on Exception catch(e) {
+      if(context.mounted) {
+        Navigator.pop(context);
+      }
+      WidgetUtils.buildDialog(context, child: Text("Something Wrong ${e.toString()}"));
+    }
+  }
+
+
+
+  Future<void> updateManager(Manager manager, BuildContext context) async {
+    try{
+      WidgetUtils.loadingDialog(context, 'Updating Manager ....');
+      Manager completeManager = await _managerRepository.updateManager(manager);
+
+      /// update managers locally ...
+     Manager relatedManager = _managers.firstWhere((item)=>item.id == completeManager.id);
+      int index = _managers.indexOf(relatedManager);
+      _managers[index] = completeManager;
+
+      notifyListeners();
+
+      if(context.mounted) {
+        Navigator.pop(context);
+        Navigator.pop(context);
+      }
+    } on Exception catch(e) {
+      if(context.mounted) {
+        Navigator.pop(context);
+      }
+      WidgetUtils.buildDialog(context, child: Text("Something Wrong ${e.toString()}"));
+    }
+  }
+
+
+  Future<List<Permission>?> getPermissions() async {
+      for(int i =0; i<_permissions.length; i++) {
+        _permissions[i].copyWith(read: true);
+        _permissions[i].copyWith(readWrite: true);
+      }
+    _permissions = await _managerRepository.getPermissions();
     notifyListeners();
-    return _managers;
+    return _permissions;
   }
 
-  Future<void> addManager(Manager manager) async {
-    _managerRepository.addManager(manager);
+  updateRead(int id, val) {
+    _permissions[id] = _permissions[id].copyWith(read: val);
     notifyListeners();
   }
+
+  updateReadWrite(int id, val) {
+    _permissions[id] = _permissions[id].copyWith(readWrite: val);
+    notifyListeners();
+  }
+
+  void setEditPermissions(List<Permission>? permissions) {
+    _permissions = permissions!;
+    notifyListeners();
+  }
+
+  void setIsFromEdit(bool val) {
+    _isFromEdit = val;
+    notifyListeners();
+  }
+
+  set setManagerEditData(Manager manager) {
+    _currentManager = manager;
+    setIsFromEdit(true);
+    notifyListeners();
+  }
+
+
+
 }
+
+
+
+
+
+
+

@@ -1,11 +1,6 @@
 import 'package:clients_digcoach/providers/add_club_provider.dart';
-import 'package:clients_digcoach/providers/club_provider.dart';
 import 'package:clients_digcoach/utils/widget_utils.dart';
-import 'package:clients_digcoach/widgets/clubs/amenities_widget.dart';
-import 'package:clients_digcoach/widgets/clubs/courts_widget.dart';
-import 'package:clients_digcoach/widgets/clubs/general_info_widget.dart';
-import 'package:clients_digcoach/widgets/clubs/holidays_widget.dart';
-import 'package:clients_digcoach/widgets/clubs/opening_hours_widget.dart';
+import 'package:clients_digcoach/widgets/clubs/manager_info_widget.dart';
 import 'package:clients_digcoach/widgets/tab_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -25,7 +20,7 @@ class _AddManagerScreenState extends ConsumerState<AddManagerScreen> {
       'General Info',
     ];
     const widgets = [
-      GeneralInfoWidget(),
+      ManagerInfoWidget(),
     ];
     return Scaffold(
       body: ListView(

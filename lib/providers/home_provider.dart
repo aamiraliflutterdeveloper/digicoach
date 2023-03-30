@@ -20,4 +20,14 @@ class HomeProvider extends ChangeNotifier {
     _endDrawerPopup = endDrawerPopup;
     notifyListeners();
   }
+
+  /// end drawer status ...
+  bool _endDrawerStatus = false;
+  bool get endDrawerStatus => _endDrawerStatus;
+
+  set endDrawerChanges(bool status) {
+    _endDrawerStatus = status;
+    notifyListeners();
+  }
+
 }

@@ -1,3 +1,4 @@
+import 'package:clients_digcoach/utils/widget_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -27,6 +28,9 @@ class CoachProvider extends ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
+  bool _isEdit = false;
+  bool get isEdit => _isEdit;
+
   /// setters
   void _loading(bool isLoading) {
     _isLoading = isLoading;
@@ -48,14 +52,22 @@ class CoachProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> removeCoachById(String id) async {
-    if (id == coaches.first.id) return;
+  Future<void> removeCoachById(Coach coach, BuildContext context) async {
+         try{
+        WidgetUtils.loadingDialog(context, 'Removing Coach ....');
+        final deletedManager = await _coachRepository.deleteManager(coach);
+        _coaches.remove(deletedManager);
+        notifyListeners();
+        if(context.mounted) {
+          Navigator.pop(context);
+        }
+      } on Exception catch(e) {
+        if(context.mounted) {
+          Navigator.pop(context);
+        }
+        WidgetUtils.buildDialog(context, child: Text("Something Wrong ${e.toString()}"));
+      }
 
-    _loading(true);
-    _coaches = List.of(_coaches)..removeWhere((coach) => coach.id == id);
-    await _coachRepository.removeCoachById(id);
-    _loading(false);
-    notifyListeners();
   }
 
   Future<String?> getCoachId(String id) async {
@@ -64,10 +76,16 @@ class CoachProvider extends ChangeNotifier {
     return selectedCoachId;
   }
 
-  Future<List<Coach>> getCoaches() async {
-    _coaches = await _coachRepository.getCoaches();
-    notifyListeners();
-    return _coaches;
+  Future<void> getCoaches(BuildContext context) async {
+    _loading(true);
+    try {
+      _coaches = await _coachRepository.getCoaches();
+      notifyListeners();
+      _loading(false);
+    } on Exception catch(e) {
+      _loading(false);
+      WidgetUtils.buildDialog(context, child: Text("Something Wrong ${e.toString()}"));
+    }
   }
 
   Future<List<Coach>> getCoachesByClubId(String id) async {
@@ -77,4 +95,66 @@ class CoachProvider extends ChangeNotifier {
     notifyListeners();
     return _coachesByClubId;
   }
+
+
+  Future<void> addCoach(Coach coach, BuildContext context) async {
+    try {
+      WidgetUtils.loadingDialog(context, 'Creating New Coach ....');
+      Coach completeCoach = await _coachRepository.addCoach(coach);
+      _coaches.insert(0, completeCoach);
+      notifyListeners();
+      if(context.mounted) {
+        Navigator.pop(context);
+        Navigator.pop(context);
+      }
+    } on Exception catch(e) {
+      if(context.mounted) {
+        Navigator.pop(context);
+      }
+      WidgetUtils.buildDialog(context, child: Text("Something Wrong ${e.toString()}"));
+    }
+  }
+
+
+  Future<void> updateCoach(Coach coach, BuildContext context) async {
+    try{
+      WidgetUtils.loadingDialog(context, 'Updating Coach ....');
+      Coach completeCoach = await _coachRepository.updateManager(coach);
+
+      /// update _coaches locally ...
+      Coach relatedManager = _coaches.firstWhere((item)=>item.id == completeCoach.id);
+      int index = _coaches.indexOf(relatedManager);
+      _coaches[index] = completeCoach;
+
+      notifyListeners();
+
+      if(context.mounted) {
+        Navigator.pop(context);
+        Navigator.pop(context);
+      }
+    } on Exception catch(e) {
+      if(context.mounted) {
+        Navigator.pop(context);
+      }
+      WidgetUtils.buildDialog(context, child: Text("Something Wrong ${e.toString()}"));
+    }
+  }
+
+  void setIsEdit(bool val) {
+    _isEdit = val;
+    notifyListeners();
+  }
+  Coach? currentCoach;
+
+  set setCoachEditData(Coach coach) {
+    currentCoach = coach;
+    setIsEdit(true);
+    notifyListeners();
+  }
+
 }
+
+
+
+
+
