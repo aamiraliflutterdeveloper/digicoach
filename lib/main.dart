@@ -11,13 +11,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 Future<void> initializeFirebase() async {
   await Firebase.initializeApp(
     options: const FirebaseOptions(
-        apiKey: "AIzaSyDqNP8XwlaXIKKrfwUaMMsS0AT17ZL1Bv4",
-        authDomain: "digicoach-49ee0.firebaseapp.com",
-        projectId: "digicoach-49ee0",
-        storageBucket: "digicoach-49ee0.appspot.com",
-        messagingSenderId: "631059407718",
-        appId: "1:631059407718:web:9dcd8e5a1ea9bb64135ea7",
-        measurementId: "G-D7WZC6EXF6"
     ),
   );
 }
